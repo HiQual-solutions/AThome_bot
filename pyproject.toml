@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "athome-bot"
+version = "0.1.0"
+description = ""
+authors = ["StanisLove <sta-tun-slav@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = "^2.25.1"
+
+[tool.poetry.scripts]
+start = "src.main:run"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

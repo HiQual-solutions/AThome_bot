@@ -1,0 +1,40 @@
+version: "3.4"
+
+services:
+  # scheduler:
+  #   image: "app-base"
+  #   env_file: ".env"
+  #   command: "dramatiq src.tasks"
+  #   network_mode: "host"
+
+  bot_start:
+    image: "app-base"
+    command: "start"
+    env_file: ".env"
+    network_mode: "host"
+
+  bot_setup:
+    image: "app-base"
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  zmongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    volumes:
+      - ~/apps/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-dbname}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-Athome_bot}
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres:
+  pgadmin:

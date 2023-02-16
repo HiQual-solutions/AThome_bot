@@ -4,15 +4,19 @@ version = "0.1.0"
 description = ""
 authors = ["StanisLove <sta-tun-slav@yandex.ru>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "./src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 aiogram = "^2.25.1"
+typer = "^0.7.0"
+pymongo = "^4.3.3"
+python-dotenv = "^0.21.1"
+pygismeteo = "^5.0.6"
 
 [tool.poetry.scripts]
 start = "src.main:run"
-
+setup_db = "src.db.postgresql:setup_db"
 
 [build-system]
 requires = ["poetry-core"]

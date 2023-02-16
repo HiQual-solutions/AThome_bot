@@ -6,6 +6,17 @@ services:
   #   env_file: ".env"
   #   command: "dramatiq src.tasks"
   #   network_mode: "host"
+  webapp-start:
+    image: "webapp-web"
+    command: "serve -s ./front -l 4500"
+    network_mode: "host"
+
+  webapp-setup:
+    image: "webapp-web"
+    build:
+      context: .
+      dockerfile: DockerFile-NPM
+    # network_mode: "host"
 
   bot_start:
     image: "app-base"

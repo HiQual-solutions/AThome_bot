@@ -1,4 +1,4 @@
-import logging, os
+import logging, os, json
 
 import aiogram.utils.markdown as md
 from aiogram import Bot, Dispatcher, types
@@ -8,12 +8,16 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import executor
+from aiogram.types.web_app_info import WebAppInfo
+from aiogram.types.reply_keyboard import ReplyKeyboardMarkup
+from aiogram.types.reply_keyboard import KeyboardButton
+
 
 from typer import Typer
 
 from src.db.mongo import db_collection
-from src.func.info import get_weather_and_currency
 
+from src.func.info import get_weather_and_currency
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачиы
 
@@ -24,6 +28,14 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=os.getenv("TG_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
+
+
+web_app = WebAppInfo(url=os.getenv("WEBAPP_URL"))
+keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text='Услуги', web_app=web_app)]
+    ]
+)
 
 
 class AppealStates(StatesGroup):
@@ -45,7 +57,7 @@ async def welcome(message: types.Message):
     f"\n{data['date'][1]}.{data['date'][0]}" + 
     f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=inlineKeyboard)
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=keyboard)
 
 
 @dp.message_handler(state=AppealStates.waiting_appeal_text)
@@ -126,6 +138,14 @@ async def callback_handler(callback: types.CallbackQuery, state: FSMContext):
 
         await callback.message.answer("Введите текст обращения", reply_markup=inlineKeyboard)
         await state.set_state(AppealStates.waiting_appeal_text)
+
+
+@dp.message_handler(content_types='web_app_data')
+async def get_data(message):
+    data = json.loads(message.web_app_data.data)
+    #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
+    await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
+
 
 @mybot.command()
 def run() -> None:

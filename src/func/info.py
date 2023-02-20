@@ -7,6 +7,9 @@ gismeteo = Gismeteo()
 
 def get_weather_and_currency():
     search_results = gismeteo.search.by_query("Алматы")
+    if len(search_results) <= 0:
+        return None
+    
     city_id = search_results[0].id
     current = gismeteo.current.by_id(city_id)
 

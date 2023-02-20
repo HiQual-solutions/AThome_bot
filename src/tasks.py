@@ -1,4 +1,4 @@
-import dramatiq, time
+import dramatiq, os
 from src.db.mongo import db_collection
 from src.func.info import get_weather_and_currency
 from datetime import datetime
@@ -15,4 +15,8 @@ def get_all_dramatiq():
         data["period"] = int(datetime.now().timestamp())
         Data_menu.add_row(data)
 
-    get_all_dramatiq.send_with_options(delay = 360000)
+        get_all_dramatiq.send_with_options(delay = 360000)
+        return
+    
+    get_all_dramatiq.send_with_options(delay = int(os.getenv("TIME_IF_NO_DATA")))
+        

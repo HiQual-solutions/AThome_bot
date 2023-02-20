@@ -8,15 +8,15 @@ Data_menu = db_collection("Data_menu")
 
 @dramatiq.actor
 def get_all_dramatiq():
-
     data = get_weather_and_currency()
     if data is not None: # if data is empty 
-        logging.error("[TOO MANY QUERY]")
+        logging.info("[GOOD DATA]")
         data["period"] = int(datetime.now().timestamp())
         Data_menu.add_row(data)
 
         get_all_dramatiq.send_with_options(delay = 360000)
         return
     
+    logging.error("[TOO MANY QUERY]")
     get_all_dramatiq.send_with_options(delay = int(os.getenv("TIME_IF_NO_DATA")))
         

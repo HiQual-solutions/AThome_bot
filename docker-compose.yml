@@ -7,11 +7,11 @@ services:
     command: "dramatiq src.tasks"
     network_mode: "host"
 
-  # webapp-start:
-  #   image: "webapp-web"
-  #   command: "serve -s ./front -l 6100"
-  #   network_mode: "host"
-  #   restart: unless-stopped
+  webapp-start:
+    image: "webapp-web"
+    command: "serve -s ./front -l 6100"
+    network_mode: "host"
+    restart: unless-stopped
 
   webapp-setup:
     image: "webapp-web"
@@ -20,12 +20,12 @@ services:
       dockerfile: DockerFile-NPM
   # network_mode: "host"
 
-  # bot_start:
-  #   image: "app-base"
-  #   command: "start"
-  #   env_file: ".env"
-  #   network_mode: "host"
-  #   restart: unless-stopped
+  bot_start:
+    image: "app-base"
+    command: "start"
+    env_file: ".env"
+    network_mode: "host"
+    restart: unless-stopped
 
   bot_setup:
     image: "app-base"

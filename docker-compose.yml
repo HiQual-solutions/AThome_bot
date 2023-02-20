@@ -6,6 +6,7 @@ services:
     env_file: ".env"
     command: "dramatiq src.tasks"
     network_mode: "host"
+    restart: unless-stopped
 
   webapp-start:
     image: "webapp-web"

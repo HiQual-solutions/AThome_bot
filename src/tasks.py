@@ -1,4 +1,4 @@
-import dramatiq, os
+import dramatiq, os, logging
 from src.db.mongo import db_collection
 from src.func.info import get_weather_and_currency
 from datetime import datetime
@@ -11,7 +11,7 @@ def get_all_dramatiq():
 
     data = get_weather_and_currency()
     if data is not None: # if data is empty 
-        print("[TOO MANY QUERY]")
+        logging.error("[TOO MANY QUERY]")
         data["period"] = int(datetime.now().timestamp())
         Data_menu.add_row(data)
 

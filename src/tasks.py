@@ -17,6 +17,5 @@ def get_all_dramatiq():
         get_all_dramatiq.send_with_options(delay = 360000)
         return
     
-    logging.error("[TOO MANY QUERY]")
     get_all_dramatiq.send_with_options(delay = int(os.getenv("TIME_IF_NO_DATA")))
         

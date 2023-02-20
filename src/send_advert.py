@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
-from main import bot
+from bot import bot
 
 RENT_CHATID = "-829365974"
 
@@ -13,14 +13,14 @@ class RentStates(StatesGroup):
 
 async def rent_text_entered(msg: types.Message, state: FSMContext):
     if len(msg.text) < 5:
-        await msg.answer("Òåêñò îïèñàíèÿ äîëæåí ñîñòîÿòü ìèíèìóì èç 5 ñèìâîëîâ")
+        await msg.answer("Ð¢ÐµÐºÑÑ‚ Ð¾Ð¿Ð¸ÑÐ°Ð½Ð¸Ñ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾ÑÑ‚Ð¾ÑÑ‚ÑŒ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ Ð¸Ð· 5 ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð²")
         return 
     
     button = types.InlineKeyboardButton(
-            "Îòìåíà", callback_data="rent_cancel")
+            "ÐžÑ‚Ð¼ÐµÐ½Ð°", callback_data="rent_cancel")
     inlineKeyboard = types.InlineKeyboardMarkup().add(button)
 
-    await msg.answer("Ââåäèòå öåíó ìåñòà", reply_markup=inlineKeyboard)
+    await msg.answer("Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ñ†ÐµÐ½Ñƒ Ð¼ÐµÑÑ‚Ð°", reply_markup=inlineKeyboard)
     await state.set_state(RentStates.waiting_rent_price)
     await state.update_data(rent_text=msg.text)
 
@@ -28,22 +28,22 @@ async def rent_price_entered(msg: types.Message, state: FSMContext):
     price = int(msg.text)
 
     if (price < 0):
-        await msg.answer("Öåíà íå ìîæåò áûòü ìåíüøå 0")
+        await msg.answer("Ð¦ÐµÐ½Ð° Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ Ð¼ÐµÐ½ÑŒÑˆÐµ 0")
         return
 
-    button = types.InlineKeyboardButton(text="Çàêîí÷èòü", callback_data="rent_photo_ready")
+    button = types.InlineKeyboardButton(text="Ð—Ð°ÐºÐ¾Ð½Ñ‡Ð¸Ñ‚ÑŒ", callback_data="rent_photo_ready")
     inlineKeyboard = types.InlineKeyboardMarkup().add(button)
     button = types.InlineKeyboardButton(
-            "Îòìåíà", callback_data="rent_cancel")
+            "ÐžÑ‚Ð¼ÐµÐ½Ð°", callback_data="rent_cancel")
     inlineKeyboard = inlineKeyboard.add(button)
 
-    await msg.answer("Îòïðàâüòå ôîòî ìåñòà, ïîñëå ÷åãî íàæìèòå êíîïêó \"çàêîí÷èòü\"", reply_markup=inlineKeyboard)
+    await msg.answer("ÐžÑ‚Ð¿Ñ€Ð°Ð²ÑŒÑ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ð¼ÐµÑÑ‚Ð°, Ð¿Ð¾ÑÐ»Ðµ Ñ‡ÐµÐ³Ð¾ Ð½Ð°Ð¶Ð¼Ð¸Ñ‚Ðµ ÐºÐ½Ð¾Ð¿ÐºÑƒ \"Ð·Ð°ÐºÐ¾Ð½Ñ‡Ð¸Ñ‚ÑŒ\"", reply_markup=inlineKeyboard)
     await state.set_state(RentStates.waiting_rent_photo)
     await state.update_data(rent_price=price)
     
 async def rent_photo_sended(msg: types.Message, state: FSMContext):
     if len(msg.photo) < 0:
-        await msg.answer("Ïðèêðåïèòå ôîòî ìåñòà")
+        await msg.answer("ÐŸÑ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ð¼ÐµÑÑ‚Ð°")
 
     user_data = await state.get_data()
     cur_data = []
@@ -60,11 +60,11 @@ async def rent_photo_ready(cb: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
 
     if 'rent_photo' not in user_data:
-        await cb.message.answer("Ïðèêðåïèòå ôîòî ìåñòà")
+        await cb.message.answer("ÐŸÑ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ð¼ÐµÑÑ‚Ð°")
         return 
 
-    await cb.message.answer("Âàøå îáúÿâëåíèå îòïðàâëåíî")
-    await bot.send_message(RENT_CHATID, f"Íîâîå îáúÿâëåíèå\n\n{user_data['rent_text']}\nÖåíà: {user_data['rent_price']}")
+    await cb.message.answer("Ð’Ð°ÑˆÐµ Ð¾Ð±ÑŠÑÐ²Ð»ÐµÐ½Ð¸Ðµ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¾")
+    await bot.send_message(RENT_CHATID, f"ÐÐ¾Ð²Ð¾Ðµ Ð¾Ð±ÑŠÑÐ²Ð»ÐµÐ½Ð¸Ðµ\n\n{user_data['rent_text']}\nÐ¦ÐµÐ½Ð°: {user_data['rent_price']}")
     
     for photo in user_data['rent_photo']:
         await bot.send_photo(RENT_CHATID, photo)    
@@ -74,7 +74,7 @@ async def rent_photo_ready(cb: types.CallbackQuery, state: FSMContext):
 async def rent_cancel(cb: types.CallbackQuery, state: FSMContext):
     await cb.answer()
 
-    await cb.message.answer("Âû îòìåíèëè ñîçäàíèå îáúÿâëåíèÿ")
+    await cb.message.answer("Ð’Ñ‹ Ð¾Ñ‚Ð¼ÐµÐ½Ð¸Ð»Ð¸ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ðµ Ð¾Ð±ÑŠÑÐ²Ð»ÐµÐ½Ð¸Ñ")
     await state.finish()
 
 def setup(dp: Dispatcher):

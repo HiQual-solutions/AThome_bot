@@ -16,6 +16,7 @@ from aiogram.types.inline_keyboard import InlineKeyboardButton
 
 import send_appeal
 import send_advert
+from bot import bot
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -33,7 +34,7 @@ User = db_collection("User")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=os.getenv("TG_TOKEN"))
+# bot = Bot(token=os.getenv("TG_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 

@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
-from main import bot
+from bot import bot
 
 class AppealStates(StatesGroup):
     waiting_appeal_text = State()
@@ -10,22 +10,22 @@ class AppealStates(StatesGroup):
 
 async def appeal_text_entered(message: types.Message, state: FSMContext):
     if len(message.text) < 5:
-        await message.answer("Òåêñò îáðàùåíèÿ äîëæåí ñîñòàâëÿòü ìèíèìóì 5 ñèìâîëîâ")
+        await message.answer("Ð¢ÐµÐºÑÑ‚ Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ñ Ð´Ð¾Ð»Ð¶ÐµÐ½ ÑÐ¾ÑÑ‚Ð°Ð²Ð»ÑÑ‚ÑŒ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼ 5 ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð²")
         return
 
-    button = types.InlineKeyboardButton(text="Çàêîí÷èòü", callback_data="appeal_photo_ready")
+    button = types.InlineKeyboardButton(text="Ð—Ð°ÐºÐ¾Ð½Ñ‡Ð¸Ñ‚ÑŒ", callback_data="appeal_photo_ready")
     inlineKeyboard = types.InlineKeyboardMarkup().add(button)
-    button = types.InlineKeyboardButton(text="Îòìåíà", callback_data="appeal_cancel")
+    button = types.InlineKeyboardButton(text="ÐžÑ‚Ð¼ÐµÐ½Ð°", callback_data="appeal_cancel")
     inlineKeyboard = inlineKeyboard.add(button)
 
 
     await state.update_data(appeal_text=message.text)
-    await message.answer("Ïðèêðåïèòå ôîòî ê îáðàùåíèþ, ïîñëå òîãî êàê ïðèêðåïèòå âñå ôîòî, íàæìèòå íà êíîïêó", reply_markup=inlineKeyboard)
+    await message.answer("ÐŸÑ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ðº Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸ÑŽ, Ð¿Ð¾ÑÐ»Ðµ Ñ‚Ð¾Ð³Ð¾ ÐºÐ°Ðº Ð¿Ñ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ð²ÑÐµ Ñ„Ð¾Ñ‚Ð¾, Ð½Ð°Ð¶Ð¼Ð¸Ñ‚Ðµ Ð½Ð° ÐºÐ½Ð¾Ð¿ÐºÑƒ", reply_markup=inlineKeyboard)
     await state.set_state(AppealStates.waiting_appeal_photo)
 
 async def appeal_photo_sended(message: types.Message, state: FSMContext):
     if len(message.photo) < 1:
-        await message.answer("Ïðèêðåïèòå ôîòî ê îáðàùåíèþ")
+        await message.answer("ÐŸÑ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ðº Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸ÑŽ")
         return
 
     user_data = await state.get_data()
@@ -43,12 +43,12 @@ async def appeal_photo_ready(callback: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
 
     if 'appeal_photo' not in user_data:
-        await callback.message.answer("Ïðèêðåïèòå ôîòî ê îáðàùåíèþ")
+        await callback.message.answer("ÐŸÑ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ñ‚Ðµ Ñ„Ð¾Ñ‚Ð¾ Ðº Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸ÑŽ")
         return
 
     user_data = await state.get_data()
-    await callback.message.answer(f"Âàøå îáðàùåíèå îòïðàâëåíî\nÒåêñò îáðàùåíèÿ: {user_data['appeal_text']}")
-    await bot.send_message(chat_id="-829365974", text=f"Ïîñòóïèëî íîâîå îáðàùåíèå îò ïîëüçîâàòåëÿ {callback.from_user.full_name}\n\n{user_data['appeal_text']}")
+    await callback.message.answer(f"Ð’Ð°ÑˆÐµ Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ Ð¾Ñ‚Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¾\nÐ¢ÐµÐºÑÑ‚ Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ñ: {user_data['appeal_text']}")
+    await bot.send_message(chat_id="-829365974", text=f"ÐŸÐ¾ÑÑ‚ÑƒÐ¿Ð¸Ð»Ð¾ Ð½Ð¾Ð²Ð¾Ðµ Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ Ð¾Ñ‚ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ {callback.from_user.full_name}\n\n{user_data['appeal_text']}")
 
     for el in user_data['appeal_photo']:
         await bot.send_photo(chat_id="-829365974", photo=el)
@@ -58,7 +58,7 @@ async def appeal_photo_ready(callback: types.CallbackQuery, state: FSMContext):
 async def appeal_cancel(callback: types.CallbackQuery, state: FSMContext):
     await callback.answer()
 
-    await callback.message.answer("Âû îòìåíèëè îáðàùåíèå")
+    await callback.message.answer("Ð’Ñ‹ Ð¾Ñ‚Ð¼ÐµÐ½Ð¸Ð»Ð¸ Ð¾Ð±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ðµ")
     await state.finish()
 
 def setup(dp: Dispatcher):

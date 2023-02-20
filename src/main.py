@@ -191,6 +191,6 @@ async def get_data(message):
 
 @mybot.command()
 def run() -> None:
-    print("[RUN SERVICE]")
+    logging.info("[RUN SERVICE]")
     get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

@@ -11,6 +11,8 @@ from aiogram.utils import executor
 from aiogram.types.web_app_info import WebAppInfo
 from aiogram.types.reply_keyboard import ReplyKeyboardMarkup
 from aiogram.types.reply_keyboard import KeyboardButton
+from aiogram.types.inline_keyboard import InlineKeyboardMarkup
+from aiogram.types.inline_keyboard import InlineKeyboardButton
 
 
 from typer import Typer
@@ -31,16 +33,21 @@ dp = Dispatcher(bot, storage=storage)
 
 
 web_app = WebAppInfo(url=os.getenv("WEBAPP_URL"))
-keyboard = ReplyKeyboardMarkup(
+
+main_keyboard = InlineKeyboardMarkup()
+
+webapp_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Услуги', web_app=web_app)]
     ]
 )
 
-
 class AppealStates(StatesGroup):
     waiting_appeal_text = State()
     waiting_appeal_photo = State()
+    sendInvoice = State()
+    moneybox = State()
+
 
 
 @dp.message_handler(commands=["start"])
@@ -48,8 +55,9 @@ async def welcome(message: types.Message):
     if message.from_user.id != message.chat.id:
         return
 
-    button = types.InlineKeyboardButton("Написать обращение", callback_data="appeal")
-    inlineKeyboard = types.InlineKeyboardMarkup().add(button)
+    inlineKeyboard = main_keyboard.add(types.InlineKeyboardButton("Написать обращение", callback_data="appeal"))
+    inlineKeyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку: ", callback_data='payment'))
+
 
     data = await get_weather_and_currency()
 
@@ -57,8 +65,46 @@ async def welcome(message: types.Message):
     f"\n{data['date'][1]}.{data['date'][0]}" + 
     f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=keyboard)
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=inlineKeyboard)
 
+
+
+
+@dp.callback_query_handler(lambda c: c.data == 'payment')
+async def activate_payment(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.send_message(callback_query.from_user.id, 'Отправьте сумму пожертвования: ')
+    await AppealStates.sendInvoice.set()
+
+
+@dp.message_handler(state=AppealStates.sendInvoice)
+async def get_amout(message: types.Message, state: FSMContext):
+
+    try:
+        PRICE = types.LabeledPrice(label='Пожертвование', amount=int(message.text) * 100)
+        await bot.send_invoice(message.chat.id, title='Working Time Machine',
+                            description='Переведенные средства пойдут на благоустройство ЖК',
+                            provider_token='381764678:TEST:50701',
+                            currency='rub',
+                            prices=[PRICE],
+                            start_parameter='time-machine-example',
+                            payload='HAPPY FRIDAYS COUPON')
+
+        await state.finish()
+    except: 
+        await bot.send_message(message.chat.id, "Введено некоректное значение! Значение суммы должно быть целым числом большим 100. Попробуйте еще раз:")
+    
+
+@dp.pre_checkout_query_handler(lambda query: True)
+async def checkout(pre_checkout_query: types.PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
+                                        error_message="Ошибка оплаты")
+
+
+@dp.message_handler(content_types=ContentTypes.SUCCESSFUL_PAYMENT)
+async def got_payment(message: types.Message):
+    await bot.send_message(message.chat.id,
+                           'Спасибо!' )
+    
 
 @dp.message_handler(state=AppealStates.waiting_appeal_text)
 async def appeal_text_entered(message: types.Message, state: FSMContext):

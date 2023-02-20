@@ -14,8 +14,8 @@ from aiogram.types.reply_keyboard import KeyboardButton
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup
 from aiogram.types.inline_keyboard import InlineKeyboardButton
 
-import send_appeal
-import send_advert
+from send_appeal import setup as send_appeal_setup
+from send_advert import setup as send_advert_setup
 from bot import bot
 
 class InvoiceStates(StatesGroup):
@@ -114,6 +114,6 @@ async def get_data(message):
 
 @mybot.command()
 def run() -> None:
-    send_appeal.setup(dp)
-    send_advert.setup(dp)
+    send_appeal_setup(dp)
+    send_advert_setup(dp)
     executor.start_polling(dp, skip_updates=False)

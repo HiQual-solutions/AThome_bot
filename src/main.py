@@ -18,12 +18,13 @@ from aiogram.types.inline_keyboard import InlineKeyboardButton
 from typer import Typer
 
 from src.db.mongo import db_collection
+from src.tasks import get_all_dramatiq
 
-from src.func.info import get_weather_and_currency
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-# TODO: реализовать отложенные задачиы
+# TODO: реализовать отложенные задачи
 
 User = db_collection("User")
+Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -59,7 +60,7 @@ async def welcome(message: types.Message):
     inlineKeyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку: ", callback_data='payment'))
 
 
-    data = await get_weather_and_currency()
+    data = Data_menu.find_by_sort([("period", -1)])
 
     await message.answer(f"Добрый день, {message.from_user.full_name}" + 
     f"\n{data['date'][1]}.{data['date'][0]}" + 
@@ -100,11 +101,6 @@ async def checkout(pre_checkout_query: types.PreCheckoutQuery):
                                         error_message="Ошибка оплаты")
 
 
-@dp.message_handler(content_types=ContentTypes.SUCCESSFUL_PAYMENT)
-async def got_payment(message: types.Message):
-    await bot.send_message(message.chat.id,
-                           'Спасибо!' )
-    
 
 @dp.message_handler(state=AppealStates.waiting_appeal_text)
 async def appeal_text_entered(message: types.Message, state: FSMContext):
@@ -195,4 +191,5 @@ async def get_data(message):
 
 @mybot.command()
 def run() -> None:
+    get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

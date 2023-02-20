@@ -1,17 +1,18 @@
-import dramatiq
-import requests
+import dramatiq, time
+from src.db.mongo import db_collection
+from src.func.info import get_weather_and_currency
+from datetime import datetime
+
+Data_menu = db_collection("Data_menu")
 
 
 @dramatiq.actor
-def count_words(url):
-     response = requests.get(url)
-     count = len(response.text.split(" "))
-     print(f"There are {count} words at {url!r}.")
+def get_all_dramatiq():
 
+    data = get_weather_and_currency()
+    if data is not None: # if data is empty 
+        print("[TOO MANY QUERY]")
+        data["period"] = int(datetime.now().timestamp())
+        Data_menu.add_row(data)
 
-# Synchronously count the words on example.com in the current process
-count_words("http://example.com")
-
-# or send the actor a message so that it may perform the count
-# later, in a separate process.
-count_words.send("http://example.com")
+    get_all_dramatiq.send_with_options(delay = 360000)

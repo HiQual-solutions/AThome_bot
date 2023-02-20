@@ -29,10 +29,15 @@ class MongoDatabase():
     def get_list_of_collections(self) -> list:
         return db.list_collection_names()
     
+    def find_by_sort(self, by_sort: list):
+        return db[self.collection_name].find_one(sort=by_sort)
+    
     def get_all_rows(self, row):
         return [x for x in db[self.collection_name].find(row)]
 
 class db_collection(MongoDatabase):
     def __init__(self, name_of_collection):
         self.collection_name = name_of_collection
+
+
 

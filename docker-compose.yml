@@ -1,15 +1,17 @@
 version: "3.4"
 
 services:
-  # scheduler:
-  #   image: "app-base"
-  #   env_file: ".env"
-  #   command: "dramatiq src.tasks"
-  #   network_mode: "host"
-  webapp-start:
-    image: "webapp-web"
-    command: "serve -s ./front -l 6100"
+  scheduler:
+    image: "app-base"
+    env_file: ".env"
+    command: "dramatiq src.tasks"
     network_mode: "host"
+
+  # webapp-start:
+  #   image: "webapp-web"
+  #   command: "serve -s ./front -l 6100"
+  #   network_mode: "host"
+  #   restart: unless-stopped
 
   webapp-setup:
     image: "webapp-web"
@@ -18,11 +20,12 @@ services:
       dockerfile: DockerFile-NPM
   # network_mode: "host"
 
-  bot_start:
-    image: "app-base"
-    command: "start"
-    env_file: ".env"
-    network_mode: "host"
+  # bot_start:
+  #   image: "app-base"
+  #   command: "start"
+  #   env_file: ".env"
+  #   network_mode: "host"
+  #   restart: unless-stopped
 
   bot_setup:
     image: "app-base"
@@ -40,11 +43,13 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-dbname}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
       - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-Athome_bot}
+    restart: unless-stopped
 
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
 volumes:
   postgres:

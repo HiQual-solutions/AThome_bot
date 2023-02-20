@@ -45,6 +45,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
       - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-Athome_bot}
     restart: unless-stopped
+    logging:
+      driver: none
 
   redis:
     image: "redis:alpine"

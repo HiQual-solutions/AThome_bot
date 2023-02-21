@@ -6,13 +6,13 @@ services:
     env_file: ".env"
     command: "dramatiq src.tasks"
     network_mode: "host"
-    restart: unless-stopped
+    restart: always
 
   webapp-start:
     image: "webapp-web"
     command: "serve -s ./front -l 6100"
     network_mode: "host"
-    restart: unless-stopped
+    restart: always
 
   webapp-setup:
     image: "webapp-web"
@@ -26,7 +26,7 @@ services:
     command: "start"
     env_file: ".env"
     network_mode: "host"
-    restart: unless-stopped
+    restart: always
 
   bot_setup:
     image: "app-base"
@@ -44,7 +44,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-dbname}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-changeme}
       - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-Athome_bot}
-    restart: unless-stopped
+    restart: always
     logging:
       driver: none
 
@@ -52,7 +52,7 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
-    restart: unless-stopped
+    restart: always
 
 volumes:
   postgres:

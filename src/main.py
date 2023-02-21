@@ -8,13 +8,16 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode, ContentTypes
 from aiogram.utils import executor
-from aiogram.types.web_app_info import WebAppInfo
 from aiogram.types.reply_keyboard import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardButton
 
-from src.send_appeal import setup as send_appeal_setup
-from src.send_advert import setup as send_advert_setup
+from src.send_appeal import setup as send_appeal_setup, AppealStates
+from src.send_advert import setup as send_advert_setup, RentStates
 from src.bot import bot
+
+import src.func.info as get_info
+
+from src.keyboards import webapp_keyboard, main_keyboard
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -22,14 +25,14 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-from src.db.mongo import db_collection
-from src.tasks import get_all_dramatiq
+# from src.db.mongo import db_collection
+# from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
 
-User = db_collection("User")
-Data_menu = db_collection("Data_menu")
+# User = db_collection("User")
+# Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -37,31 +40,25 @@ logging.basicConfig(level=logging.INFO)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-web_app = WebAppInfo(url=os.getenv("WEBAPP_URL"))
-
-
-webapp_keyboard = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text='Услуги', web_app=web_app)]
-    ]
-)
 
 @dp.message_handler(commands=["start"])
 async def welcome(message: types.Message):
     if message.from_user.id != message.chat.id:
         return
 
-    main_keyboard = InlineKeyboardMarkup()
-    inlineKeyboard = main_keyboard.add(InlineKeyboardButton("Написать обращение", callback_data="appeal"))
-    inlineKeyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку: ", callback_data='payment'))
+    # data = Data_menu.find_by _sort([("period", -1)])
+    # await message.answer(f"Добрый день, {message.from_user.full_name}" + 
+    # f"\n{data['date'][1]}.{data['date'][0]}" + 
+    # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
+    # f"\nДавление: {data['pressure']} рт. ст." +
+    # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=inlineKeyboard)
 
-
-    data = Data_menu.find_by_sort([("period", -1)])
+    data = get_info.get_weather_and_currency()
     await message.answer(f"Добрый день, {message.from_user.full_name}" + 
     f"\n{data['date'][1]}.{data['date'][0]}" + 
     f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=inlineKeyboard)
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 
 
 
@@ -107,6 +104,16 @@ async def get_data(message):
     #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
     await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
 
+@dp.callback_query_handler(lambda c: c.data in ["appeal", "parking_rent"])
+async def appeal_or_rent(cb: types.CallbackQuery):
+    await cb.answer()
+    if cb.data == "appeal":
+        await AppealStates.waiting_appeal_text.set()
+        await cb.message.answer("Введите текст обращения")
+    elif cb.data == "parking_rent":
+        await RentStates.waiting_rent_text.set()
+        await cb.message.answer("Введите описание места")
+
 
 @mybot.command()
 def run() -> None:
@@ -115,5 +122,5 @@ def run() -> None:
     
     logging.info("[RUN SERVICE]")
     
-    get_all_dramatiq()
+    # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

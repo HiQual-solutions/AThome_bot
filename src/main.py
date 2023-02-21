@@ -14,6 +14,13 @@ from aiogram.types.reply_keyboard import KeyboardButton
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup
 from aiogram.types.inline_keyboard import InlineKeyboardButton
 
+from send_appeal import setup as send_appeal_setup
+from send_advert import setup as send_advert_setup
+from bot import bot
+
+class InvoiceStates(StatesGroup):
+    sendInvoice = State()
+    moneybox = State()
 
 from typer import Typer
 
@@ -28,7 +35,7 @@ Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=os.getenv("TG_TOKEN"))
+# bot = Bot(token=os.getenv("TG_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -42,12 +49,6 @@ webapp_keyboard = ReplyKeyboardMarkup(
         [KeyboardButton(text='Услуги', web_app=web_app)]
     ]
 )
-
-class AppealStates(StatesGroup):
-    waiting_appeal_text = State()
-    waiting_appeal_photo = State()
-    sendInvoice = State()
-    moneybox = State()
 
 
 
@@ -74,10 +75,10 @@ async def welcome(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data == 'payment')
 async def activate_payment(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(callback_query.from_user.id, 'Отправьте сумму пожертвования: ')
-    await AppealStates.sendInvoice.set()
+    await InvoiceStates.sendInvoice.set()
 
 
-@dp.message_handler(state=AppealStates.sendInvoice)
+@dp.message_handler(state=InvoiceStates.sendInvoice)
 async def get_amout(message: types.Message, state: FSMContext):
 
     try:
@@ -100,6 +101,10 @@ async def checkout(pre_checkout_query: types.PreCheckoutQuery):
     await bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
                                         error_message="Ошибка оплаты")
 
+@dp.message_handler(content_types=ContentTypes.SUCCESSFUL_PAYMENT)
+async def got_payment(message: types.Message):
+    await bot.send_message(message.chat.id,
+                           'Спасибо!' )    
 
 
 @dp.message_handler(state=AppealStates.waiting_appeal_text)
@@ -181,7 +186,6 @@ async def callback_handler(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.answer("Введите текст обращения", reply_markup=inlineKeyboard)
         await state.set_state(AppealStates.waiting_appeal_text)
 
-
 @dp.message_handler(content_types='web_app_data')
 async def get_data(message):
     data = json.loads(message.web_app_data.data)
@@ -191,6 +195,10 @@ async def get_data(message):
 
 @mybot.command()
 def run() -> None:
+    send_appeal_setup(dp)
+    send_advert_setup(dp)
+    
     logging.info("[RUN SERVICE]")
+    
     get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

@@ -13,10 +13,13 @@ typer = "^0.7.0"
 pymongo = "^4.3.3"
 python-dotenv = "^0.21.1"
 pygismeteo = "^5.0.6"
+dramatiq = "^1.14.0"
+redis = "^4.5.1"
 
 [tool.poetry.scripts]
 start = "src.main:run"
 setup_db = "src.db.postgresql:setup_db"
+test_dramatiq = "src.tasks:run"
 
 [build-system]
 requires = ["poetry-core"]

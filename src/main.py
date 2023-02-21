@@ -25,12 +25,13 @@ class InvoiceStates(StatesGroup):
 from typer import Typer
 
 from src.db.mongo import db_collection
+from src.tasks import get_all_dramatiq
 
-from src.func.info import get_weather_and_currency
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-# TODO: реализовать отложенные задачиы
+# TODO: реализовать отложенные задачи
 
 User = db_collection("User")
+Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -60,7 +61,7 @@ async def welcome(message: types.Message):
     inlineKeyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку: ", callback_data='payment'))
 
 
-    data = await get_weather_and_currency()
+    data = Data_menu.find_by_sort([("period", -1)])
 
     await message.answer(f"Добрый день, {message.from_user.full_name}" + 
     f"\n{data['date'][1]}.{data['date'][0]}" + 
@@ -105,6 +106,86 @@ async def got_payment(message: types.Message):
     await bot.send_message(message.chat.id,
                            'Спасибо!' )    
 
+
+@dp.message_handler(state=AppealStates.waiting_appeal_text)
+async def appeal_text_entered(message: types.Message, state: FSMContext):
+    if len(message.text) < 5:
+        await message.answer("Текст обращения должен составлять минимум 5 символов")
+        return
+
+    button = types.InlineKeyboardButton(text="Закончить", callback_data="appeal_photo_ready")
+    inlineKeyboard = types.InlineKeyboardMarkup().add(button)
+    button = types.InlineKeyboardButton(text="Отмена", callback_data="appeal_cancel")
+    inlineKeyboard = inlineKeyboard.add(button)
+
+
+    await state.update_data(appeal_text=message.text)
+    await message.answer("Прикрепите фото к обращению, после того как прикрепите все фото, нажмите на кнопку", reply_markup=inlineKeyboard)
+    await state.set_state(AppealStates.waiting_appeal_photo)
+
+
+@dp.message_handler(state=AppealStates.waiting_appeal_photo, content_types=['document', 'text', 'photo'])
+async def appeal_photo_sended(message: types.Message, state: FSMContext):
+    if len(message.photo) < 1:
+        await message.answer("Прикрепите фото к обращению")
+        return
+
+    user_data = await state.get_data()
+    cur_data = []
+
+    if 'appeal_photo' in user_data:
+        cur_data = user_data['appeal_photo']
+
+    cur_data.append(message.photo[-1].file_id)
+    await state.update_data(appeal_photo=cur_data)
+
+
+@dp.callback_query_handler(state=AppealStates.waiting_appeal_photo)
+async def appeal_photo_ready(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    if callback.data == "appeal_photo_ready":
+        user_data = await state.get_data()
+
+        if 'appeal_photo' not in user_data:
+            await callback.message.answer("Прикрепите фото к обращению")
+            return
+
+        user_data = await state.get_data()
+        await callback.message.answer(f"Ваше обращение отправлено\nТекст обращения: {user_data['appeal_text']}")
+        await bot.send_message(chat_id="-829365974", text=f"Поступило новое обращение от пользователя {callback.from_user.full_name}\n\n{user_data['appeal_text']}")
+
+        for el in user_data['appeal_photo']:
+            await bot.send_photo(chat_id="-829365974", photo=el)
+    
+        await state.finish()
+    elif callback.data == "appeal_cancel":
+        await appeal_cancel(callback, state)
+
+
+@dp.callback_query_handler(state=AppealStates.waiting_appeal_text)
+async def appeal_cancel(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    if callback.data != "appeal_cancel":
+        return
+
+    await callback.message.answer("Вы отменили обращение")
+    await state.finish()
+
+
+@dp.callback_query_handler()
+async def callback_handler(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    if (callback.data == "appeal"):
+        button = types.InlineKeyboardButton(
+            "Отмена", callback_data="appeal_cancel")
+        inlineKeyboard = types.InlineKeyboardMarkup().add(button)
+
+        await callback.message.answer("Введите текст обращения", reply_markup=inlineKeyboard)
+        await state.set_state(AppealStates.waiting_appeal_text)
+
 @dp.message_handler(content_types='web_app_data')
 async def get_data(message):
     data = json.loads(message.web_app_data.data)
@@ -116,4 +197,8 @@ async def get_data(message):
 def run() -> None:
     send_appeal_setup(dp)
     send_advert_setup(dp)
+    
+    logging.info("[RUN SERVICE]")
+    
+    get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

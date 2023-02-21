@@ -17,7 +17,7 @@ from src.bot import bot
 
 import src.func.info as get_info
 
-from src.keyboards import webapp_keyboard, main_keyboard
+from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -107,15 +107,19 @@ async def get_data(message):
     #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
     await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
 
-@dp.callback_query_handler(lambda c: c.data in ["appeal", "parking_rent"])
+# @dp.callback_query_handler(lambda c: c.data in ["appeal", "parking_rent"])
+# async def appeal_or_rent(cb: types.CallbackQuery):
+#     await cb.answer()
+#     if cb.data == "appeal":
+#         await AppealStates.waiting_appeal_text.set()
+#         await cb.message.answer("Введите текст обращения")
+#     elif cb.data == "parking_rent":
+#         await RentStates.waiting_rent_text.set()
+#         await cb.message.answer("Введите описание места")
+
+@dp.callback_query_handler(lambda c: c.data == 'rent_menu')
 async def appeal_or_rent(cb: types.CallbackQuery):
-    await cb.answer()
-    if cb.data == "appeal":
-        await AppealStates.waiting_appeal_text.set()
-        await cb.message.answer("Введите текст обращения")
-    elif cb.data == "parking_rent":
-        await RentStates.waiting_rent_text.set()
-        await cb.message.answer("Введите описание места")
+    await cb.message.edit_text(cb.message.text, reply_markup=rent_keyboard)
 
 
 @mybot.command()

@@ -30,6 +30,7 @@ from typer import Typer
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
+# TODO: добавить все чаты в .env
 
 # User = db_collection("User")
 # Data_menu = db_collection("Data_menu")
@@ -54,11 +55,13 @@ async def welcome(message: types.Message):
     # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=inlineKeyboard)
 
     data = get_info.get_weather_and_currency()
-    await message.answer(f"Добрый день, {message.from_user.full_name}" + 
+    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    await bot.send_message(message.chat.id, 
     f"\n{data['date'][1]}.{data['date'][0]}" + 
     f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
     f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
+    # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
 
 
 

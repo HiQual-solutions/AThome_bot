@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 
 from src.bot import bot
 
-RENT_CHATID = "-829365974"
+RENT_CHATID = "-1001865322306"
 
 class RentStates(StatesGroup):
     waiting_rent_text = State()

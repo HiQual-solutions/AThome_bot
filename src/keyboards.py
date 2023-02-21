@@ -15,4 +15,4 @@ webapp_keyboard = ReplyKeyboardMarkup(
 main_keyboard = InlineKeyboardMarkup()
 main_keyboard = main_keyboard.add(InlineKeyboardButton("Написать обращение", callback_data="appeal"))
 main_keyboard = main_keyboard.add(InlineKeyboardButton("Сдать парковочное место", callback_data="parking_rent"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку: ", callback_data='payment'))
+main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'))

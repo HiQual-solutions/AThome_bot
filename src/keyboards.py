@@ -14,5 +14,9 @@ webapp_keyboard = ReplyKeyboardMarkup(
 
 main_keyboard = InlineKeyboardMarkup()
 main_keyboard = main_keyboard.add(InlineKeyboardButton("Написать обращение", callback_data="appeal"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton("Сдать парковочное место", callback_data="parking_rent"))
+main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Покупка/продажа", callback_data='rent_menu'))
 main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'))
+
+rent_keyboard = InlineKeyboardMarkup()
+rent_keyboard = main_keyboard.add(InlineKeyboardButton("Сдать/продать парковочное место", callback_data="parking_rent"))
+rent_keyboard = main_keyboard.add(InlineKeyboardButton("Сдать/продать недвижимость", callback_data="appart_rent"))

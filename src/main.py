@@ -13,11 +13,12 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
+from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
 from src.bot import bot
 
-import src.func.info as get_info
+import src.func.info as get_weather_and_currency
 
-from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard
+from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard, buy_keyboard
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -25,15 +26,15 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-from src.db.mongo import db_collection
-from src.tasks import get_all_dramatiq
+# from src.db.mongo import db_collection
+# from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
 # TODO: добавить все чаты в .env
 
-User = db_collection("User")
-Data_menu = db_collection("Data_menu")
+# User = db_collection("User")
+# Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -47,12 +48,12 @@ async def welcome(message: types.Message):
     if message.from_user.id != message.chat.id:
         return
 
-    data = Data_menu.find_by_sort([("period", -1)])
-    await message.answer(f"Добрый день, {message.from_user.full_name}" + 
-    f"\n{data['date'][1]}.{data['date'][0]}" + 
-    f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
-    f"\nДавление: {data['pressure']} рт. ст." +
-    '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=main_keyboard)
+    # data = Data_menu.find_by_sort([("period", -1)])
+    # await message.answer(f"Добрый день, {message.from_user.full_name}" + 
+    # f"\n{data['date'][1]}.{data['date'][0]}" + 
+    # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
+    # f"\nДавление: {data['pressure']} рт. ст." +
+    # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=main_keyboard)
 
     # data = get_info.get_weather_and_currency()
     # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
@@ -63,7 +64,7 @@ async def welcome(message: types.Message):
     # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
     # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
 
-
+    await message.answer("Меню", reply_markup=main_keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'payment')
@@ -107,27 +108,46 @@ async def get_data(message):
     #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
     await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
 
-# @dp.callback_query_handler(lambda c: c.data in ["appeal", "parking_rent"])
-# async def appeal_or_rent(cb: types.CallbackQuery):
+@dp.callback_query_handler(lambda c: c.data in ["appeal", "rent_appart", "rent_parking"])
+async def appeal_or_rent(cb: types.CallbackQuery):
+    await cb.answer()
+    if cb.data == "appeal":
+        await AppealStates.waiting_appeal_text.set()
+        await cb.message.answer("Введите текст обращения")
+    elif cb.data == "rent_parking":
+        await RentStates.waiting_rent_text.set()
+        await cb.message.answer("Введите описание места")
+    elif cb.data == "rent_appart":
+        await AppartRentState.waiting_rent_text.set()
+        await cb.message.answer("Введите описание")
+
+# @dp.callback_query_handler(lambda c: c.data in ["buy_parking", "buy_appart"])
+# async def buy(cb: types.CallbackQuery):
 #     await cb.answer()
-#     if cb.data == "appeal":
-#         await AppealStates.waiting_appeal_text.set()
-#         await cb.message.answer("Введите текст обращения")
-#     elif cb.data == "parking_rent":
-#         await RentStates.waiting_rent_text.set()
-#         await cb.message.answer("Введите описание места")
+#     if cb.data == 'buy_parking':
+
+
 
 @dp.callback_query_handler(lambda c: c.data == 'rent_menu')
-async def appeal_or_rent(cb: types.CallbackQuery):
+async def set_rent(cb: types.CallbackQuery):
     await cb.message.edit_text(cb.message.text, reply_markup=rent_keyboard)
+
+@dp.callback_query_handler(lambda c: c.data == 'buy_menu')
+async def set_buy(cb: types.CallbackQuery):
+    await cb.message.edit_text(cb.message.text, reply_markup=buy_keyboard)
+
+@dp.callback_query_handler(lambda c: c.data == 'goback')
+async def rent_goback(cb: types.CallbackQuery):
+    await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
 
 
 @mybot.command()
 def run() -> None:
     send_appeal_setup(dp)
     send_advert_setup(dp)
+    send_advert_apart_setup(dp)
     
     logging.info("[RUN SERVICE]")
     
-    get_all_dramatiq()
+    # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

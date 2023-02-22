@@ -56,6 +56,7 @@ async def welcome(message: types.Message):
     f"\nДавление: {data['pressure']} рт. ст." +
     f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 
+
     # data = get_info.get_weather_and_currency()
     # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
     # await bot.send_message(message.chat.id, 

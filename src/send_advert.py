@@ -2,9 +2,9 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
-from bot import bot
+from src.bot import bot
 
-RENT_CHATID = "-829365974"
+RENT_CHATID = "-1001865322306"
 
 class RentStates(StatesGroup):
     waiting_rent_text = State()
@@ -25,17 +25,15 @@ async def rent_text_entered(msg: types.Message, state: FSMContext):
     await state.update_data(rent_text=msg.text)
 
 async def rent_price_entered(msg: types.Message, state: FSMContext):
-    price = int(msg.text)
+    price = msg.text
 
-    if (price < 0):
-        await msg.answer("Цена не может быть меньше 0")
-        return
+    # if (price < 0):
+    #     await msg.answer("Цена не может быть меньше 0")
+    #     return
 
-    button = types.InlineKeyboardButton(text="Закончить", callback_data="rent_photo_ready")
-    inlineKeyboard = types.InlineKeyboardMarkup().add(button)
-    button = types.InlineKeyboardButton(
-            "Отмена", callback_data="rent_cancel")
-    inlineKeyboard = inlineKeyboard.add(button)
+    inlineKeyboard = types.InlineKeyboardMarkup()
+    inlineKeyboard = inlineKeyboard.add(types.InlineKeyboardButton(text="Закончить", callback_data="rent_photo_ready"))
+    inlineKeyboard = inlineKeyboard.add(types.InlineKeyboardButton(text="Отмена", callback_data="rent_cancel"))
 
     await msg.answer("Отправьте фото места, после чего нажмите кнопку \"закончить\"", reply_markup=inlineKeyboard)
     await state.set_state(RentStates.waiting_rent_photo)
@@ -81,5 +79,5 @@ def setup(dp: Dispatcher):
     dp.register_message_handler(rent_text_entered, state=RentStates.waiting_rent_text)
     dp.register_message_handler(rent_price_entered, state=RentStates.waiting_rent_price)
     dp.register_message_handler(rent_photo_sended, state=RentStates.waiting_rent_photo, content_types=['document', 'text', 'photo'])
-    dp.callback_query_handler(rent_photo_ready, lambda c: c.data == "rent_photo_ready", state=RentStates.waiting_rent_photo)
-    dp.callback_query_handler(rent_cancel, lambda c: c.data == "rent_cancel", state=RentStates.all_states)
+    dp.register_callback_query_handler(rent_photo_ready, lambda c: c.data == "rent_photo_ready", state=RentStates.waiting_rent_photo)
+    dp.register_callback_query_handler(rent_cancel, lambda c: c.data == "rent_cancel", state=RentStates.all_states)

@@ -2,11 +2,13 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 
-from bot import bot
+from src.bot import bot
 
 class AppealStates(StatesGroup):
     waiting_appeal_text = State()
     waiting_appeal_photo = State() 
+
+APPEAL_CHATID = '-1001642271491'
 
 async def appeal_text_entered(message: types.Message, state: FSMContext):
     if len(message.text) < 5:
@@ -48,10 +50,10 @@ async def appeal_photo_ready(callback: types.CallbackQuery, state: FSMContext):
 
     user_data = await state.get_data()
     await callback.message.answer(f"Ваше обращение отправлено\nТекст обращения: {user_data['appeal_text']}")
-    await bot.send_message(chat_id="-829365974", text=f"Поступило новое обращение от пользователя {callback.from_user.full_name}\n\n{user_data['appeal_text']}")
+    await bot.send_message(chat_id=APPEAL_CHATID, text=f"Поступило новое обращение от пользователя {callback.from_user.full_name}\n\n{user_data['appeal_text']}")
 
     for el in user_data['appeal_photo']:
-        await bot.send_photo(chat_id="-829365974", photo=el)
+        await bot.send_photo(chat_id=APPEAL_CHATID, photo=el)
     
     await state.finish()
     

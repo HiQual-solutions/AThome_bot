@@ -28,10 +28,12 @@ def get_weather_and_currency():
         logging.error("[TOO MANY QUERY ON API OF MONEY]")
         return None
 
-    currency.append(str(data['result'])[0:6])
+    # currency.append(str(data['result'])[0:6])
 
-    data = requests.get("https://api.apilayer.com/fixer/convert?to=KZT&from=EUR&amount=1", headers=headers).json()
-    currency.append(str(data['result'])[0:6])
+    # data = requests.get("https://api.apilayer.com/fixer/convert?to=KZT&from=EUR&amount=1", headers=headers).json()
+    # currency.append(str(data['result'])[0:6])
+
+    currency = ["412", "123"]
 
     return {
         "date": date,

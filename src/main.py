@@ -26,15 +26,15 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-# from src.db.mongo import db_collection
-# from src.tasks import get_all_dramatiq
+from src.db.mongo import db_collection
+from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
 # TODO: добавить все чаты в .env
 
-# User = db_collection("User")
-# Data_menu = db_collection("Data_menu")
+User = db_collection("User")
+Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -48,13 +48,13 @@ async def welcome(message: types.Message):
     if message.from_user.id != message.chat.id:
         return
 
-
-    # data = Data_menu.find_by_sort([("period", -1)])
-    # await message.answer(f"Добрый день, {message.from_user.full_name}" + 
-    # f"\n{data['date'][1]}.{data['date'][0]}" + 
-    # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
-    # f"\nДавление: {data['pressure']} рт. ст." +
-    # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=main_keyboard)
+    data = Data_menu.find_by_sort([("period", -1)])
+    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    await message.answer(
+    f"\n{data['date'][1]}.{data['date'][0]}" + 
+    f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
+    f"\nДавление: {data['pressure']} рт. ст." +
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 
 
     # data = get_info.get_weather_and_currency()
@@ -66,7 +66,7 @@ async def welcome(message: types.Message):
     # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
     # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
 
-    await message.answer("Меню", reply_markup=main_keyboard)
+
 
 
 @dp.callback_query_handler(lambda c: c.data == 'payment')
@@ -151,5 +151,5 @@ def run() -> None:
     
     logging.info("[RUN SERVICE]")
     
-    # get_all_dramatiq()
+    get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

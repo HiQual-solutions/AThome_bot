@@ -53,6 +53,7 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    command: redis-server --appendonly yes --replica-read-only no
 
 volumes:
   postgres:

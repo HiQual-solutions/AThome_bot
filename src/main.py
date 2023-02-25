@@ -51,8 +51,8 @@ async def welcome(message: types.Message):
     data = Data_menu.find_by_sort([("period", -1)])
     await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
     await message.answer(
-    f"\n{data['date'][1]}.{data['date'][0]}" + 
-    f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
+    f"\nПоследнее обновление: {data['date']}" + 
+    f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
     f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 

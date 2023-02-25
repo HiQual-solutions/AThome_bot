@@ -1,7 +1,6 @@
 import requests, os, logging
 from typing import Optional
 from dotenv import load_dotenv
-from pprint import pp 
 
 load_dotenv()
 
@@ -13,14 +12,12 @@ def get_weather() -> Optional[list]:
         "key" : key,
         "q": "43.2,76.8"
     })
-    pp(out.json())
     try:
         weather_temp_c = out.json()["current"]["temp_c"]
         weather_data = out.json()["current"]["last_updated"].split(" ")
         weather_data = weather_data[0].split("-")[2] + "." + weather_data[0].split("-")[1] + " " + weather_data[1]
         humidity =  out.json()["current"]["humidity"]
         pressure = float(out.json()['current']["pressure_mb"]) * 0.750063755419211
-        # print(weather_data, weather_temp_c)
         return [weather_data, weather_temp_c, humidity, int(pressure)] 
     except:
         return None

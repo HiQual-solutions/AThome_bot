@@ -46,7 +46,7 @@ def get_list():
             data = plumbing.get_all_rows({"status" : "active"})
     
     if data == []:
-        return {}
+        return []
     
     print(data)
 

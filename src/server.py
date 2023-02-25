@@ -74,4 +74,4 @@ def add_test_data():
     })
 
 def run():
-    app.run(host="localhost", port="5600") # запуск сервераp
+    app.run(host="0.0.0.0", port="5600") # запуск сервераp

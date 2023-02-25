@@ -13,12 +13,14 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
+from src.barrier import setup as barrier_setup, BarrierStates
+from src.masters import setup as masters_setup, MasterStates, cancel_keyboard
 from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
 from src.bot import bot
 
 import src.func.info as get_weather_and_currency
 
-from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard, buy_keyboard
+from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard, buy_keyboard, master_keyboard
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -56,14 +58,15 @@ async def welcome(message: types.Message):
     f"\nДавление: {data['pressure']} рт. ст." +
     f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 
+
     # data = get_info.get_weather_and_currency()
     # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
     # await bot.send_message(message.chat.id, 
     # f"\n{data['date'][1]}.{data['date'][0]}" + 
     # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     # f"\nДавление: {data['pressure']} рт. ст." +
-    # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
-    # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
+    # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)`
+    await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
 
 
 
@@ -109,7 +112,7 @@ async def get_data(message):
     #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
     await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
 
-@dp.callback_query_handler(lambda c: c.data in ["appeal", "rent_appart", "rent_parking"])
+@dp.callback_query_handler(lambda c: c.data in ["appeal", "rent_appart", "rent_parking", "barrier"])
 async def appeal_or_rent(cb: types.CallbackQuery):
     await cb.answer()
     if cb.data == "appeal":
@@ -121,6 +124,10 @@ async def appeal_or_rent(cb: types.CallbackQuery):
     elif cb.data == "rent_appart":
         await AppartRentState.waiting_rent_text.set()
         await cb.message.answer("Введите описание")
+    elif cb.data == "barrier":
+        await BarrierStates.waiting_barrier_text.set()
+        barrier_keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(text="Отмена", callback_data='barrier_cancel'))
+        await cb.message.answer("Введите информацию, по которой охранник пропустит гостя (номер авто, название компании доставки и т.д):", reply_markup=barrier_keyboard)
 
 # @dp.callback_query_handler(lambda c: c.data in ["buy_parking", "buy_appart"])
 # async def buy(cb: types.CallbackQuery):
@@ -142,11 +149,41 @@ async def rent_goback(cb: types.CallbackQuery):
     await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
 
 
+@dp.callback_query_handler(lambda c: c.data == 'order_master')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.edit_text("Выберите тип услуги:", reply_markup=master_keyboard)
+    await state.set_state(MasterStates.waiting_order_type)
+
+@dp.callback_query_handler(lambda c: c.data in ['order_cleaning', 'order_logistic', 'order_repair', 'order_painter', 'order_electrician', 'order_plumber'], state=MasterStates.waiting_order_type )
+async def handle_master(cb: types.CallbackQuery, state: FSMContext):
+    await cb.message.answer("Опишите пробему, которую нужно решить:", reply_markup=cancel_keyboard)
+    await state.set_state(MasterStates.waiting_order_text)
+    if cb.data == 'order_cleaning':
+        await state.update_data(type='Клининг')
+    elif cb.data == 'order_logistic':
+        await state.update_data(type='Логистика')
+    elif cb.data == 'order_painter':
+        await state.update_data(type='Маляры')
+    elif cb.data == 'order_repair':
+        await state.update_data(type='Ремонт')
+    elif cb.data == 'order_logistic':
+        await state.update_data(type='Логистика')
+    elif cb.data == 'order_electrician':
+        await state.update_data(type='Электрика')
+    elif cb.data == 'order_plumber':
+        await state.update_data(type='Сантехника')
+    
+    
+        
+
+
 @mybot.command()
 def run() -> None:
     send_appeal_setup(dp)
     send_advert_setup(dp)
     send_advert_apart_setup(dp)
+    barrier_setup(dp)
+    masters_setup(dp)
     
     logging.info("[RUN SERVICE]")
     

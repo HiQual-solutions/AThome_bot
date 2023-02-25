@@ -14,12 +14,16 @@ pymongo = "^4.3.3"
 python-dotenv = "^0.21.1"
 dramatiq = "^1.14.0"
 redis = "^4.5.1"
+Flask = "^2.2.3"
+Flask-Cors = "^3.0.10"
 
 [tool.poetry.scripts]
 start = "src.main:run"
 setup_db = "src.db.postgresql:setup_db"
 test_dramatiq = "src.tasks:run"
 get_weather = "src.func.info:get_weather"
+server = "src.server:run"
+add_server_test = "src.server:add_test_data"
 
 [build-system]
 requires = ["poetry-core"]

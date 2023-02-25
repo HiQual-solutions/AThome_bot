@@ -21,6 +21,19 @@ services:
       dockerfile: DockerFile-NPM
   # network_mode: "host"
 
+  webapp_back_start:
+    image: "app-base"
+    command: "server"
+    env_file: ".env"
+    network_mode: "host"
+    restart: always
+
+  webapp_back_setup:
+    image: "app-base"
+    command: "add_server_test"
+    env_file: ".env"
+    network_mode: "host"
+
   bot_start:
     image: "app-base"
     command: "start"

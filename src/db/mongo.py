@@ -35,6 +35,10 @@ class MongoDatabase():
     def get_all_rows(self, row):
         return [x for x in db[self.collection_name].find(row)]
 
+    def drop_collection(self):
+        db[self.collection_name].drop()
+
+
 class db_collection(MongoDatabase):
     def __init__(self, name_of_collection):
         self.collection_name = name_of_collection

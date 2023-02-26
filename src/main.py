@@ -42,12 +42,7 @@ from src.db.mongo import db_collection
 from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-<<<<<<< HEAD
 
-=======
-# TODO: реализовать отложенные задачи
-# TODO: добавить все чаты в .env
->>>>>>> eb45eb74f4d55cf0857c59368e4774e88d7f2eb1
 
 User = db_collection("User")
 Data_menu = db_collection("Data_menu")
@@ -79,7 +74,7 @@ async def welcome(message: types.Message, state: FSMContext):
     f"\nПоследнее обновление: {data['date']}" + 
     f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_id, admins))
 
 
 
@@ -158,7 +153,7 @@ async def set_buy(cb: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'goback')
 async def rent_goback(cb: types.CallbackQuery):
-    await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
+    await cb.message.edit_text(cb.message.text, reply_markup=set_main_keyboard(cb.from_user.id, admins))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'order_master')
@@ -215,6 +210,6 @@ def run() -> None:
    
     logging.info("[RUN SERVICE]")
     
-    get_all_dramatiq()
+    # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)
 

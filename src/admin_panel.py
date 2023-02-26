@@ -51,9 +51,16 @@ async def ap_waiting_master_num(message: types.Message, state: FSMContext):
     await state.update_data(master_number=message.text)
 
 
+    await AdminStates.waiting_master_price.set()
+    await message.answer("Укажите цену мастера")
+
+async def ap_waiting_master_price(message: types.Message, state:FSMContext):
+    await state.update_data(master_price=message.text)
+
+
     await AdminStates.waiting_master_photo.set()
     await message.answer("Отправьте фото мастера")
-
+    
 async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
     if len(message.photo) < 1:
         await message.answer("Отправьте фото мастера")
@@ -79,6 +86,7 @@ async def ap_waiting_master_type(cb: types.CallbackQuery, state: FSMContext):
     master_id = masters[-1].id + 1
     master_name = user_data["master_name"]
     master_number = user_data["master_number"]
+    master_price = user_data["master_price"]
     master_photo = user_data["master_photo"]
     master_type = int(cb.data.split("_")[2])
 
@@ -159,6 +167,7 @@ def setup(dp: Dispatcher):
     dp.register_callback_query_handler(ap_waiting_masterID, state=AdminStates.waiting_masterID)
     dp.register_message_handler(ap_waiting_master_name, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_name)
     dp.register_message_handler(ap_waiting_master_num, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_number)
+    dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_price)
     dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
     dp.register_callback_query_handler(ap_waiting_master_type, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_type)
     dp.register_callback_query_handler(ap_add_admin, lambda c: c.data == "admin_panel_add_admin")

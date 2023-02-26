@@ -245,8 +245,6 @@ def setup(dp: Dispatcher):
 
     admins_list = admins.get_all_admins({"status" : "active"})
 
-    logging.info("[ADMIN_LIST: ]" + "|".join(admins_list))
-
     dp.register_callback_query_handler(open_admin_panel, lambda c: c.data == "open_admin_panel",  lambda c: c.from_user.id in admins_list)
     dp.register_callback_query_handler(ap_add_master, lambda c: c.data == "admin_panel_add_master", lambda c: c.from_user.id in admins_list)
     dp.register_callback_query_handler(ap_remove_master, lambda c: c.data == "admin_panel_remove_master", lambda c: c.from_user.id in admins_list)

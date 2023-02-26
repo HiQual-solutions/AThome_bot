@@ -3,6 +3,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardButton
 
+import logging
+
 from src.db.mongo import db_collection
 from src.bot import bot
 from src.keyboards import admin_keyboard
@@ -242,6 +244,8 @@ async def ap_waiting_adminID_remove(cb: types.CallbackQuery, state: FSMContext):
 def setup(dp: Dispatcher):
 
     admins_list = admins.get_all_admins({"status" : "active"})
+
+    logging.info("[ADMIN_LIST: ]" + "|".join(admins_list))
 
     dp.register_callback_query_handler(open_admin_panel, lambda c: c.data == "open_admin_panel",  lambda c: c.from_user.id in admins_list)
     dp.register_callback_query_handler(ap_add_master, lambda c: c.data == "admin_panel_add_master", lambda c: c.from_user.id in admins_list)

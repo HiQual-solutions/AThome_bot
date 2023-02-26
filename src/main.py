@@ -31,7 +31,7 @@ from typer import Typer
 # from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-# TODO: реализовать отложенные задачи
+
 
 # User = db_collection("User")
 # Data_menu = db_collection("Data_menu")

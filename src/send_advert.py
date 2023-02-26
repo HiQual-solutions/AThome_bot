@@ -27,10 +27,6 @@ async def rent_text_entered(msg: types.Message, state: FSMContext):
 async def rent_price_entered(msg: types.Message, state: FSMContext):
     price = msg.text
 
-    # if (price < 0):
-    #     await msg.answer("Цена не может быть меньше 0")
-    #     return
-
     inlineKeyboard = types.InlineKeyboardMarkup()
     inlineKeyboard = inlineKeyboard.add(types.InlineKeyboardButton(text="Закончить", callback_data="rent_photo_ready"))
     inlineKeyboard = inlineKeyboard.add(types.InlineKeyboardButton(text="Отмена", callback_data="rent_cancel"))

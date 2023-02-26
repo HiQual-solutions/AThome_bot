@@ -213,6 +213,10 @@ def run() -> None:
     loop.run_until_complete(future) # loop until done
    
     logging.info("[RUN SERVICE]")
+    admins.add_row({
+        "adminID": 588558797,
+        "status": "active",
+    })
     
     # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

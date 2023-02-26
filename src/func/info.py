@@ -33,9 +33,9 @@ def get_weather_and_currency() -> Optional[dict]:
     headers = {"apikey": os.getenv("CURRENCY_TOKEN")}
     data = requests.get("https://api.apilayer.com/fixer/convert?to=KZT&from=USD&amount=1", headers=headers).json()    
     
-    # if 'result' not in data:
-    #     logging.error("[TOO MANY QUERY ON API OF MONEY]")
-    #     return None
+    if 'result' not in data:
+        logging.error("[TOO MANY QUERY ON API OF MONEY]")
+        return None
 
     currency.append(str(data['result'])[0:6])
 

@@ -1,4 +1,5 @@
 import logging, os, json
+import asyncio
 
 import aiogram.utils.markdown as md
 from aiogram import Bot, Dispatcher, types
@@ -13,11 +14,12 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
+from src.admin_panel import setup as ap_setup, admins
 from src.bot import bot
 
 import src.func.info as get_info
 
-from src.keyboards import webapp_keyboard, main_keyboard
+from src.keyboards import webapp_keyboard, set_main_keyboard
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -36,31 +38,61 @@ from typer import Typer
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
-# bot = Bot(token=os.getenv("TG_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
+async def set_default_commands(dp):
+    await dp.bot.set_my_commands([
+        types.BotCommand("start", "Запустить бота"),
+        types.BotCommand("help", "Помощь"),
+    ])
 
-@dp.message_handler(commands=["start"])
-async def welcome(message: types.Message):
+async def check_cmd(message: types.Message, state: FSMContext):
+    print(message.text)
+    print(await state.get_state())
+
+
+@dp.message_handler(commands=["start"], state="*")
+async def welcome(message: types.Message, state: FSMContext):
     if message.from_user.id != message.chat.id:
         return
 
+    cur_state = await state.get_state()
+    print(cur_state, bool(cur_state))
+
+    if bool(cur_state):
+        await state.finish()
     # data = Data_menu.find_by _sort([("period", -1)])
     # await message.answer(f"Добрый день, {message.from_user.full_name}" + 
     # f"\n{data['date'][1]}.{data['date'][0]}" + 
     # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     # f"\nДавление: {data['pressure']} рт. ст." +
     # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=inlineKeyboard)
+   
 
     data = get_info.get_weather_and_currency()
     await message.answer(f"Добрый день, {message.from_user.full_name}" + 
     f"\n{data['date'][1]}.{data['date'][0]}" + 
     f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_id, admins))
 
 
+@dp.message_handler(commands=["help"], state="*")
+async def helper(message: types.message, state: FSMContext):
+    if message.from_user.id != message.chat.id:
+        return
+
+    cur_state = await state.get_state()
+    # print(cur_state, bool(cur_state))
+
+    if bool(cur_state):
+        await state.finish()
+
+    await message.answer("Помощник")
+    
+    # my_cmds = await dp.bot.get_my_commands()
+    # print(my_cmds)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'payment')
@@ -119,8 +151,15 @@ async def appeal_or_rent(cb: types.CallbackQuery):
 def run() -> None:
     send_appeal_setup(dp)
     send_advert_setup(dp)
+    ap_setup(dp)
     
     logging.info("[RUN SERVICE]")
     
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    future = asyncio.ensure_future(set_default_commands(dp)) # tasks to do
+    loop.run_until_complete(future) # loop until done
     # get_all_dramatiq()
+    # dp.register_message_handler(check_cmd, commands=["start", "help"], state="*")
     executor.start_polling(dp, skip_updates=False)
+

@@ -241,17 +241,17 @@ async def ap_waiting_adminID_remove(cb: types.CallbackQuery, state: FSMContext):
 
 def setup(dp: Dispatcher):
 
-    admins = admins.get_all_admins({"status" : "active"})
+    admins_list = admins.get_all_admins({"status" : "active"})
 
-    dp.register_callback_query_handler(open_admin_panel, lambda c: c.data == "open_admin_panel",  lambda c: c.from_user.id in admins)
-    dp.register_callback_query_handler(ap_add_master, lambda c: c.data == "admin_panel_add_master", lambda c: c.from_user.id in admins)
-    dp.register_callback_query_handler(ap_remove_master, lambda c: c.data == "admin_panel_remove_master", lambda c: c.from_user.id in admins)
-    dp.register_callback_query_handler(ap_waiting_masterID, lambda c: c.from_user.id in admins, state=AdminStates.waiting_masterID)
-    dp.register_message_handler(ap_waiting_master_name, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_name)
-    dp.register_message_handler(ap_waiting_master_num, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_number)
-    dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_price)
-    dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
-    dp.register_callback_query_handler(ap_waiting_master_type, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_type)
+    dp.register_callback_query_handler(open_admin_panel, lambda c: c.data == "open_admin_panel",  lambda c: c.from_user.id in admins_list)
+    dp.register_callback_query_handler(ap_add_master, lambda c: c.data == "admin_panel_add_master", lambda c: c.from_user.id in admins_list)
+    dp.register_callback_query_handler(ap_remove_master, lambda c: c.data == "admin_panel_remove_master", lambda c: c.from_user.id in admins_list)
+    dp.register_callback_query_handler(ap_waiting_masterID, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_masterID)
+    dp.register_message_handler(ap_waiting_master_name, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_name)
+    dp.register_message_handler(ap_waiting_master_num, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_number)
+    dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_price)
+    dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
+    dp.register_callback_query_handler(ap_waiting_master_type, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_type)
     dp.register_callback_query_handler(ap_add_admin, lambda c: c.data == "admin_panel_add_admin")
     dp.register_callback_query_handler(ap_remove_admin, lambda c: c.data == "admin_panel_remove_admin")
     dp.register_message_handler(ap_waiting_adminID_add, state=AdminStates.waiting_adminID_add)

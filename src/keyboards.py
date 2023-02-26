@@ -29,7 +29,7 @@ def set_main_keyboard(user, admins):
 
 admin_keyboard = InlineKeyboardMarkup()
 admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Добавить мастера", callback_data="admin_panel_add_master"))
-admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Удалить мастера", callback_data="admin_panel_remove_master"))
+# admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Удалить мастера", callback_data="admin_panel_remove_master"))
 admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Добавить администратора", callback_data="admin_panel_add_admin"))
 admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Удалить администратора", callback_data="admin_panel_remove_admin"))
 

@@ -14,12 +14,23 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
+
 from src.admin_panel import setup as ap_setup, admins
+
+from src.barrier import setup as barrier_setup, BarrierStates
+from src.security import setup as security_setup, SecurityStates, cancel_keyboard
+from src.masters import setup as masters_setup, MasterStates, cancel_keyboard
+from src.vote import setup as votes_setup, VoteStates, cancel_keyboard
+from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
+
 from src.bot import bot
 
-import src.func.info as get_info
+from aiogram.types.poll import Poll
 
-from src.keyboards import webapp_keyboard, set_main_keyboard
+import src.func.info as get_weather_and_currency
+
+from src.keyboards import webapp_keyboard, set_main_keyboard, rent_keyboard, buy_keyboard, master_keyboard
+
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -27,14 +38,15 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-# from src.db.mongo import db_collection
-# from src.tasks import get_all_dramatiq
+from src.db.mongo import db_collection
+from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
+# TODO: добавить все чаты в .env
 
-# User = db_collection("User")
-# Data_menu = db_collection("Data_menu")
+User = db_collection("User")
+Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
@@ -47,52 +59,24 @@ async def set_default_commands(dp):
         types.BotCommand("help", "Помощь"),
     ])
 
-async def check_cmd(message: types.Message, state: FSMContext):
-    print(message.text)
-    print(await state.get_state())
-
-
 @dp.message_handler(commands=["start"], state="*")
 async def welcome(message: types.Message, state: FSMContext):
     if message.from_user.id != message.chat.id:
         return
 
     cur_state = await state.get_state()
-    print(cur_state, bool(cur_state))
 
     if bool(cur_state):
         await state.finish()
-    # data = Data_menu.find_by _sort([("period", -1)])
-    # await message.answer(f"Добрый день, {message.from_user.full_name}" + 
-    # f"\n{data['date'][1]}.{data['date'][0]}" + 
-    # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
-    # f"\nДавление: {data['pressure']} рт. ст." +
-    # '''f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}"''', reply_markup=inlineKeyboard)
-   
 
-    data = get_info.get_weather_and_currency()
-    await message.answer(f"Добрый день, {message.from_user.full_name}" + 
-    f"\n{data['date'][1]}.{data['date'][0]}" + 
-    f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
+    data = Data_menu.find_by_sort([("period", -1)])
+    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    await message.answer(
+    f"\nПоследнее обновление: {data['date']}" + 
+    f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_id, admins))
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
 
-
-@dp.message_handler(commands=["help"], state="*")
-async def helper(message: types.message, state: FSMContext):
-    if message.from_user.id != message.chat.id:
-        return
-
-    cur_state = await state.get_state()
-    # print(cur_state, bool(cur_state))
-
-    if bool(cur_state):
-        await state.finish()
-
-    await message.answer("Помощник")
-    
-    # my_cmds = await dp.bot.get_my_commands()
-    # print(my_cmds)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'payment')
@@ -136,30 +120,97 @@ async def get_data(message):
     #await bot.send_message(message.chat.id, data, reply_markup=keyboard)
     await bot.send_contact(chat_id=message.chat.id,phone_number=data['tel'], first_name=data['first_name'])
 
-@dp.callback_query_handler(lambda c: c.data in ["appeal", "parking_rent"])
+@dp.callback_query_handler(lambda c: c.data in ["appeal", "rent_appart", "rent_parking", "barrier"])
 async def appeal_or_rent(cb: types.CallbackQuery):
     await cb.answer()
     if cb.data == "appeal":
         await AppealStates.waiting_appeal_text.set()
         await cb.message.answer("Введите текст обращения")
-    elif cb.data == "parking_rent":
+    elif cb.data == "rent_parking":
         await RentStates.waiting_rent_text.set()
         await cb.message.answer("Введите описание места")
+    elif cb.data == "rent_appart":
+        await AppartRentState.waiting_rent_text.set()
+        await cb.message.answer("Введите описание")
+    elif cb.data == "barrier":
+        await BarrierStates.waiting_barrier_text.set()
+        barrier_keyboard = InlineKeyboardMarkup().add(InlineKeyboardButton(text="Отмена", callback_data='barrier_cancel'))
+        await cb.message.answer("Введите информацию, по которой охранник пропустит гостя (номер авто, название компании доставки и т.д):", reply_markup=barrier_keyboard)
+
+# @dp.callback_query_handler(lambda c: c.data in ["buy_parking", "buy_appart"])
+# async def buy(cb: types.CallbackQuery):
+#     await cb.answer()
+#     if cb.data == 'buy_parking':
+
+
+
+@dp.callback_query_handler(lambda c: c.data == 'rent_menu')
+async def set_rent(cb: types.CallbackQuery):
+    await cb.message.edit_text(cb.message.text, reply_markup=rent_keyboard)
+
+@dp.callback_query_handler(lambda c: c.data == 'buy_menu')
+async def set_buy(cb: types.CallbackQuery):
+    await cb.message.edit_text(cb.message.text, reply_markup=buy_keyboard)
+
+@dp.callback_query_handler(lambda c: c.data == 'goback')
+async def rent_goback(cb: types.CallbackQuery):
+    await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'order_master')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.edit_text("Выберите тип услуги:", reply_markup=master_keyboard)
+    await state.set_state(MasterStates.waiting_order_type)
+
+@dp.callback_query_handler(lambda c: c.data == 'create_vote')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.answer("Напишите вопрос, который будет решаться голосванием: ")
+    await state.set_state(VoteStates.waiting_vote_question)
+
+@dp.callback_query_handler(lambda c: c.data in ['order_cleaning', 'order_logistic', 'order_repair', 'order_painter', 'order_electrician', 'order_plumber'], state=MasterStates.waiting_order_type )
+async def handle_master(cb: types.CallbackQuery, state: FSMContext):
+    await cb.message.answer("Опишите пробему, которую нужно решить:", reply_markup=cancel_keyboard)
+    await state.set_state(MasterStates.waiting_order_text)
+    if cb.data == 'order_cleaning':
+        await state.update_data(type='Клининг')
+    elif cb.data == 'order_logistic':
+        await state.update_data(type='Логистика')
+    elif cb.data == 'order_painter':
+        await state.update_data(type='Маляры')
+    elif cb.data == 'order_repair':
+        await state.update_data(type='Ремонт')
+    elif cb.data == 'order_logistic':
+        await state.update_data(type='Логистика')
+    elif cb.data == 'order_electrician':
+        await state.update_data(type='Электрика')
+    elif cb.data == 'order_plumber':
+        await state.update_data(type='Сантехника')
+    
+@dp.callback_query_handler(lambda c: c.data == 'request_secr')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.answer("Напишите номер дома: ", reply_markup=cancel_keyboard)
+    await state.set_state(SecurityStates.waiting_home_number)
+        
 
 
 @mybot.command()
 def run() -> None:
     send_appeal_setup(dp)
     send_advert_setup(dp)
+    send_advert_apart_setup(dp)
+    barrier_setup(dp)
+    masters_setup(dp)
+    votes_setup(dp)
+    security_setup(dp)
     ap_setup(dp)
-    
-    logging.info("[RUN SERVICE]")
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     future = asyncio.ensure_future(set_default_commands(dp)) # tasks to do
     loop.run_until_complete(future) # loop until done
-    # get_all_dramatiq()
-    # dp.register_message_handler(check_cmd, commands=["start", "help"], state="*")
+   
+    logging.info("[RUN SERVICE]")
+    
+    get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)
 

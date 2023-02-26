@@ -40,8 +40,9 @@ async def rent_price_entered(msg: types.Message, state: FSMContext):
     await state.update_data(rent_price=price)
     
 async def rent_photo_sended(msg: types.Message, state: FSMContext):
-    if len(msg.photo) < 0:
+    if len(msg.photo) < 1:
         await msg.answer("Прикрепите фото места")
+        return 
 
     user_data = await state.get_data()
     cur_data = []

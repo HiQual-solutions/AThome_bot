@@ -33,9 +33,9 @@ def get_weather_and_currency() -> Optional[dict]:
     headers = {"apikey": os.getenv("CURRENCY_TOKEN")}
     data = requests.get("https://api.apilayer.com/fixer/convert?to=KZT&from=USD&amount=1", headers=headers).json()    
     
-    if 'result' not in data:
-        logging.error("[TOO MANY QUERY ON API OF MONEY]")
-        return None
+    # if 'result' not in data:
+    #     logging.error("[TOO MANY QUERY ON API OF MONEY]")
+    #     return None
 
     currency.append(str(data['result'])[0:6])
 
@@ -44,7 +44,16 @@ def get_weather_and_currency() -> Optional[dict]:
 
     # currency = ["412", "123"]
 
+    # return {
+    #     "date": date,
+    #     "temp": current.temperature.comfort.c,
+    #     "humidity": current.humidity.percent,
+    #     "pressure": current.pressure.mm_hg_atm,
+    #     "currency": currency
+    # }
+
     return {
+
         "date": weather_data[0],
         "temp": weather_data[1],
         "humidity": weather_data[2],

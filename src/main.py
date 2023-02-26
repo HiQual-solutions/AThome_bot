@@ -1,4 +1,5 @@
 import logging, os, json
+import asyncio
 
 import aiogram.utils.markdown as md
 from aiogram import Bot, Dispatcher, types
@@ -13,18 +14,23 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
+
+from src.admin_panel import setup as ap_setup, admins
+
 from src.barrier import setup as barrier_setup, BarrierStates
 from src.security import setup as security_setup, SecurityStates, cancel_keyboard
 from src.masters import setup as masters_setup, MasterStates, cancel_keyboard
 from src.vote import setup as votes_setup, VoteStates, cancel_keyboard
 from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
+
 from src.bot import bot
 
 from aiogram.types.poll import Poll
 
 import src.func.info as get_weather_and_currency
 
-from src.keyboards import webapp_keyboard, main_keyboard, rent_keyboard, buy_keyboard, master_keyboard
+from src.keyboards import webapp_keyboard, set_main_keyboard, rent_keyboard, buy_keyboard, master_keyboard
+
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
@@ -44,15 +50,24 @@ Data_menu = db_collection("Data_menu")
 mybot = Typer()
 logging.basicConfig(level=logging.INFO)
 
-# bot = Bot(token=os.getenv("TG_TOKEN"))
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
+async def set_default_commands(dp):
+    await dp.bot.set_my_commands([
+        types.BotCommand("start", "Запустить бота"),
+        types.BotCommand("help", "Помощь"),
+    ])
 
-@dp.message_handler(commands=["start"])
-async def welcome(message: types.Message):
+@dp.message_handler(commands=["start"], state="*")
+async def welcome(message: types.Message, state: FSMContext):
     if message.from_user.id != message.chat.id:
         return
+
+    cur_state = await state.get_state()
+
+    if bool(cur_state):
+        await state.finish()
 
     data = Data_menu.find_by_sort([("period", -1)])
     await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
@@ -61,22 +76,6 @@ async def welcome(message: types.Message):
     f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
     f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)
-
-
-    # data = get_info.get_weather_and_currency()
-    # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
-    # await bot.send_message(message.chat.id, 
-    # f"\n{data['date'][1]}.{data['date'][0]}" + 
-    # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
-    # f"\nДавление: {data['pressure']} рт. ст." +
-    # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)`
-    # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
-    # await message.answer_poll(question='Your answer?',
-    #                           options=['A)', 'B)', 'C'],
-    #                           type='quiz',
-    #                           correct_option_id=1,
-    #                           is_anonymous=False)
-
 
 
 
@@ -203,8 +202,15 @@ def run() -> None:
     masters_setup(dp)
     votes_setup(dp)
     security_setup(dp)
-
+    ap_setup(dp)
+    
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    future = asyncio.ensure_future(set_default_commands(dp)) # tasks to do
+    loop.run_until_complete(future) # loop until done
+   
     logging.info("[RUN SERVICE]")
     
     get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)
+

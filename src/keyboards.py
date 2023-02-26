@@ -4,6 +4,8 @@ from aiogram.types.reply_keyboard import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types.web_app_info import WebAppInfo
 
+# from src.admin_panel import admins
+
 web_app = WebAppInfo(url=os.getenv("WEBAPP_URL"))
 
 webapp_keyboard = ReplyKeyboardMarkup(
@@ -12,12 +14,25 @@ webapp_keyboard = ReplyKeyboardMarkup(
     ]
 )
 
-main_keyboard = InlineKeyboardMarkup(row_width=3)
-main_keyboard = main_keyboard.row(InlineKeyboardButton("Написать обращение", callback_data="appeal"), InlineKeyboardButton("Заказать мастера", callback_data="order_master"))
-main_keyboard = main_keyboard.row(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"), InlineKeyboardButton(text = "Вызвать охрану", callback_data='request_secr'))
-main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'), InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
-main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Голосования ЖК", url="t.me/votes_athome"),InlineKeyboardButton("Создать голосование", callback_data="create_vote"))
-main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'), InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
+def set_main_keyboard(user, admins):
+    main_keyboard = InlineKeyboardMarkup(row_width=3)
+    main_keyboard = main_keyboard.row(InlineKeyboardButton("Написать обращение", callback_data="appeal"), InlineKeyboardButton("Заказать мастера", callback_data="order_master"))
+    main_keyboard = main_keyboard.row(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"), InlineKeyboardButton(text = "Вызвать охрану", callback_data='request_secr'))
+    main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'), InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
+    main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Голосования ЖК", url="t.me/votes_athome"),InlineKeyboardButton("Создать голосование", callback_data="create_vote"))
+    main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'), InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
+
+
+    if user in admins:
+        main_keyboard.add(InlineKeyboardButton(text="Админ-панель", callback_data="open_admin_panel"))
+    return main_keyboard
+
+admin_keyboard = InlineKeyboardMarkup()
+admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Добавить мастера", callback_data="admin_panel_add_master"))
+admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Удалить мастера", callback_data="admin_panel_remove_master"))
+admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Добавить администратора", callback_data="admin_panel_add_admin"))
+admin_keyboard = admin_keyboard.add(InlineKeyboardButton("Удалить администратора", callback_data="admin_panel_remove_admin"))
+
 
 rent_keyboard = InlineKeyboardMarkup()
 rent_keyboard = rent_keyboard.add(InlineKeyboardButton("Сдать/продать парковочное место", callback_data="rent_parking"))

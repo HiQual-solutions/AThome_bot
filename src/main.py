@@ -42,8 +42,7 @@ from src.db.mongo import db_collection
 from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-# TODO: реализовать отложенные задачи
-# TODO: добавить все чаты в .env
+
 
 User = db_collection("User")
 Data_menu = db_collection("Data_menu")
@@ -154,7 +153,7 @@ async def set_buy(cb: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'goback')
 async def rent_goback(cb: types.CallbackQuery):
-    await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
+    await cb.message.edit_text(cb.message.text, reply_markup=set_main_keyboard(cb.from_user.id, admins))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'order_master')
@@ -211,6 +210,6 @@ def run() -> None:
    
     logging.info("[RUN SERVICE]")
     
-    get_all_dramatiq()
+    # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)
 

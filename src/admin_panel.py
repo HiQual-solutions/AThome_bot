@@ -7,7 +7,6 @@ from src.db.mongo import db_collection
 from src.bot import bot
 from src.keyboards import admin_keyboard
 
-
 cleaning = db_collection("cleaning")
 cargo = db_collection("cargo")
 ren_apartment = db_collection("ren_apartment")
@@ -51,9 +50,16 @@ async def ap_waiting_master_num(message: types.Message, state: FSMContext):
     await state.update_data(master_number=message.text)
 
 
+    await AdminStates.waiting_master_price.set()
+    await message.answer("Укажите цену мастера")
+
+async def ap_waiting_master_price(message: types.Message, state:FSMContext):
+    await state.update_data(master_price=message.text)
+
+
     await AdminStates.waiting_master_photo.set()
     await message.answer("Отправьте фото мастера")
-
+    
 async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
     if len(message.photo) < 1:
         await message.answer("Отправьте фото мастера")
@@ -85,6 +91,7 @@ async def ap_waiting_master_type(cb: types.CallbackQuery, state: FSMContext):
 
     master_name = user_data["master_name"]
     master_number = user_data["master_number"]
+    master_price = user_data["master_price"]
     master_photo = user_data["master_photo"]
     master_type = int(cb.data)
 
@@ -173,7 +180,6 @@ async def ap_remove_master(cb: types.CallbackQuery, state: FSMContext):
 
 async def ap_waiting_masterID(cb: types.CallbackQuery, state: FSMContext):
     await cb.answer()
-
     masterID = int(cb.data.split("_")[2])
 
     #TODO: Здесь реализовать удаление мастера из бд
@@ -185,6 +191,7 @@ async def ap_waiting_masterID(cb: types.CallbackQuery, state: FSMContext):
 
 async def ap_add_admin(cb: types.CallbackQuery):
     await cb.answer()
+
 
     await AdminStates.waiting_adminID_add.set()
 
@@ -209,11 +216,14 @@ async def ap_remove_admin(cb: types.CallbackQuery, state: FSMContext):
     await cb.answer()
 
     inlineKb = InlineKeyboardMarkup()
+
     for a in admins.get_all_admins({"status" : "active"}):
+
         inlineKb.add(InlineKeyboardButton(f"{a}", callback_data=f"remove_admin_{a}"))
 
     await cb.message.answer("Выберите ID администратора, которому хотите обнулить доступ", reply_markup=inlineKb)
     await AdminStates.waiting_adminID_remove.set()
+
 
 
 
@@ -239,6 +249,7 @@ def setup(dp: Dispatcher):
     dp.register_callback_query_handler(ap_waiting_masterID, lambda c: c.from_user.id in admins, state=AdminStates.waiting_masterID)
     dp.register_message_handler(ap_waiting_master_name, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_name)
     dp.register_message_handler(ap_waiting_master_num, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_number)
+    dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_price)
     dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
     dp.register_callback_query_handler(ap_waiting_master_type, lambda c: c.from_user.id in admins, state=AdminStates.waiting_master_type)
     dp.register_callback_query_handler(ap_add_admin, lambda c: c.data == "admin_panel_add_admin")

@@ -14,10 +14,10 @@ webapp_keyboard = ReplyKeyboardMarkup(
 
 main_keyboard = InlineKeyboardMarkup(row_width=3)
 main_keyboard = main_keyboard.row(InlineKeyboardButton("Написать обращение", callback_data="appeal"), InlineKeyboardButton("Заказать мастера", callback_data="order_master"))
-main_keyboard = main_keyboard.row(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"), InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
-main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'), InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
+main_keyboard = main_keyboard.row(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"), InlineKeyboardButton(text = "Вызвать охрану", callback_data='request_secr'))
+main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'), InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
 main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Голосования ЖК", url="t.me/votes_athome"),InlineKeyboardButton("Создать голосование", callback_data="create_vote"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'))
+main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'), InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
 
 rent_keyboard = InlineKeyboardMarkup()
 rent_keyboard = rent_keyboard.add(InlineKeyboardButton("Сдать/продать парковочное место", callback_data="rent_parking"))

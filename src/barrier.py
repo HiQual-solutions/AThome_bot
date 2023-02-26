@@ -1,16 +1,17 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
+from aiogram.types import ParseMode
 
 from src.bot import bot
 
 class BarrierStates(StatesGroup):
     waiting_barrier_text = State()
 
-BARRIER_CHATID = '-1001791992980'
+SECURITY_CHATID = '-1001791992980'
 
 async def barrier_wait(message: types.Message, state: FSMContext):
-    await bot.send_message(BARRIER_CHATID, message.text)
+    await bot.send_message(SECURITY_CHATID, f"*ОТКРЫТЬ ШЛАГБАУМ* \n\n *Информация:* {message.text}", parse_mode=ParseMode.MARKDOWN)
     await message.answer("Информация была передана охраникам.")
     await state.finish()
 

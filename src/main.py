@@ -14,6 +14,7 @@ from aiogram.types.inline_keyboard import InlineKeyboardMarkup, InlineKeyboardBu
 from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
 from src.barrier import setup as barrier_setup, BarrierStates
+from src.security import setup as security_setup, SecurityStates, cancel_keyboard
 from src.masters import setup as masters_setup, MasterStates, cancel_keyboard
 from src.vote import setup as votes_setup, VoteStates, cancel_keyboard
 from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
@@ -186,7 +187,10 @@ async def handle_master(cb: types.CallbackQuery, state: FSMContext):
     elif cb.data == 'order_plumber':
         await state.update_data(type='Сантехника')
     
-    
+@dp.callback_query_handler(lambda c: c.data == 'request_secr')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.answer("Напишите номер дома: ", reply_markup=cancel_keyboard)
+    await state.set_state(SecurityStates.waiting_home_number)
         
 
 
@@ -198,6 +202,7 @@ def run() -> None:
     barrier_setup(dp)
     masters_setup(dp)
     votes_setup(dp)
+    security_setup(dp)
 
     logging.info("[RUN SERVICE]")
     

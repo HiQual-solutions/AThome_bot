@@ -15,8 +15,11 @@ from src.send_appeal import setup as send_appeal_setup, AppealStates
 from src.send_advert import setup as send_advert_setup, RentStates
 from src.barrier import setup as barrier_setup, BarrierStates
 from src.masters import setup as masters_setup, MasterStates, cancel_keyboard
+from src.vote import setup as votes_setup, VoteStates, cancel_keyboard
 from src.send_advert_appart import setup as send_advert_apart_setup, AppartRentState
 from src.bot import bot
+
+from aiogram.types.poll import Poll
 
 import src.func.info as get_weather_and_currency
 
@@ -66,7 +69,12 @@ async def welcome(message: types.Message):
     # f"\nТемпература: {data['temp']} | Влажность: {data['humidity']}%" +
     # f"\nДавление: {data['pressure']} рт. ст." +
     # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=main_keyboard)`
-    await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
+    # await bot.send_message(message.chat.id,"-",reply_markup=main_keyboard)
+    # await message.answer_poll(question='Your answer?',
+    #                           options=['A)', 'B)', 'C'],
+    #                           type='quiz',
+    #                           correct_option_id=1,
+    #                           is_anonymous=False)
 
 
 
@@ -154,6 +162,11 @@ async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
     await cb.message.edit_text("Выберите тип услуги:", reply_markup=master_keyboard)
     await state.set_state(MasterStates.waiting_order_type)
 
+@dp.callback_query_handler(lambda c: c.data == 'create_vote')
+async def rent_goback(cb: types.CallbackQuery, state=FSMContext):
+    await cb.message.answer("Напишите вопрос, который будет решаться голосванием: ")
+    await state.set_state(VoteStates.waiting_vote_question)
+
 @dp.callback_query_handler(lambda c: c.data in ['order_cleaning', 'order_logistic', 'order_repair', 'order_painter', 'order_electrician', 'order_plumber'], state=MasterStates.waiting_order_type )
 async def handle_master(cb: types.CallbackQuery, state: FSMContext):
     await cb.message.answer("Опишите пробему, которую нужно решить:", reply_markup=cancel_keyboard)
@@ -184,7 +197,8 @@ def run() -> None:
     send_advert_apart_setup(dp)
     barrier_setup(dp)
     masters_setup(dp)
-    
+    votes_setup(dp)
+
     logging.info("[RUN SERVICE]")
     
     get_all_dramatiq()

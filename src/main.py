@@ -69,12 +69,15 @@ async def welcome(message: types.Message, state: FSMContext):
         await state.finish()
 
     data = Data_menu.find_by_sort([("period", -1)])
+    
+    admins_list = admins.get_all_admins({"status" : "active"})
+
     await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
     await message.answer(
     f"\nПоследнее обновление: {data['date']}" + 
     f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
     f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins))
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins_list))
 
 
 
@@ -153,7 +156,8 @@ async def set_buy(cb: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'goback')
 async def rent_goback(cb: types.CallbackQuery):
-    await cb.message.edit_text(cb.message.text, reply_markup=set_main_keyboard(cb.from_user.id, admins))
+    admins_list = admins.get_all_admins({"status" : "active"})
+    await cb.message.edit_text(cb.message.text, reply_markup=set_main_keyboard(cb.from_user.id, admins_list))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'order_master')

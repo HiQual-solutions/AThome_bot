@@ -12,13 +12,11 @@ webapp_keyboard = ReplyKeyboardMarkup(
     ]
 )
 
-main_keyboard = InlineKeyboardMarkup()
-main_keyboard = main_keyboard.add(InlineKeyboardButton("Написать обращение", callback_data="appeal"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton("Заказать мастера", callback_data="order_master"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"))
-main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
-main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'))
-main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
+main_keyboard = InlineKeyboardMarkup(row_width=3)
+main_keyboard = main_keyboard.row(InlineKeyboardButton("Написать обращение", callback_data="appeal"), InlineKeyboardButton("Заказать мастера", callback_data="order_master"))
+main_keyboard = main_keyboard.row(InlineKeyboardButton("Открыть шлагбаум", callback_data="barrier"), InlineKeyboardButton(text = "Сдача/продажа", callback_data='rent_menu'))
+main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Аренда/покупка", callback_data='buy_menu'), InlineKeyboardButton(text = "Новости", callback_data='buy_menu', url='https://t.me/home_bot_news'))
+main_keyboard = main_keyboard.row(InlineKeyboardButton(text = "Голосования ЖК", url="t.me/votes_athome"),InlineKeyboardButton("Создать голосование", callback_data="create_vote"))
 main_keyboard = main_keyboard.add(InlineKeyboardButton(text = "Отправить пожертвование в копилку", callback_data='payment'))
 
 rent_keyboard = InlineKeyboardMarkup()
@@ -31,7 +29,7 @@ buy_keyboard = buy_keyboard.add(InlineKeyboardButton("Канал ПАРКИНГ"
 buy_keyboard = buy_keyboard.add(InlineKeyboardButton("Канал НЕДВИЖИМОСТЬ", callback_data="buy_appart", url='https://t.me/apparts_test'))
 buy_keyboard = buy_keyboard.add(InlineKeyboardButton("Назад", callback_data="goback"))
 
-master_keyboard = InlineKeyboardMarkup()
+master_keyboard = InlineKeyboardMarkup(row_width=3)
 master_keyboard = master_keyboard.add(InlineKeyboardButton("Клининг", callback_data="order_cleaning"))
 master_keyboard = master_keyboard.add(InlineKeyboardButton("Перевозка грузов", callback_data="order_logistic"))
 master_keyboard = master_keyboard.add(InlineKeyboardButton("Ремонт квартир", callback_data="order_repair"))

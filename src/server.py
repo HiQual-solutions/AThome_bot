@@ -48,9 +48,9 @@ def get_list():
     if data == []:
         return []
     
-    # for i in range(len(data)):
-    #     data[i]["photo"] = "https://engathome.tungulov.space/static/" + data[i]["photo"]
-    #     data[i].pop('_id', None)
+    for i in range(len(data)):
+        # data[i]["photo"] = "https://engathome.tungulov.space/static/" + data[i]["photo"]
+        data[i].pop('_id', None)
 
     return {
         "data" : data,

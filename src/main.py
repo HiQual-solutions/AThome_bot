@@ -38,8 +38,8 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-from src.db.mongo import db_collection
-from src.tasks import get_all_dramatiq
+# from src.db.mongo import db_collection
+# from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 # TODO: реализовать отложенные задачи
@@ -52,6 +52,8 @@ logging.basicConfig(level=logging.INFO)
 
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
+
+
 
 async def set_default_commands(dp):
     await dp.bot.set_my_commands([
@@ -69,13 +71,13 @@ async def welcome(message: types.Message, state: FSMContext):
     if bool(cur_state):
         await state.finish()
 
-    data = Data_menu.find_by_sort([("period", -1)])
-    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
-    await message.answer(
-    f"\nПоследнее обновление: {data['date']}" + 
-    f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
-    f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins))
+    # data = Data_menu.find_by_sort([("period", -1)])
+    # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    # await message.answer(
+    # f"\nПоследнее обновление: {data['date']}" + 
+    # f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
+    # f"\nДавление: {data['pressure']} рт. ст." +
+    # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins))
 
 
 

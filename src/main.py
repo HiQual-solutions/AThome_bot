@@ -217,6 +217,6 @@ def run() -> None:
         "status": "active",
     })
     
-    get_all_dramatiq()
+    # get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)
 

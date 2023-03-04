@@ -45,7 +45,7 @@ class MongoDatabase():
         db[self.collection_name].drop()
 
     def change_data(self, query: dict, update: dict):
-        new_update = {"$srt" : update}
+        new_update = {"$set" : update}
         db[self.collection_name].update_one(query, new_update)
 
 

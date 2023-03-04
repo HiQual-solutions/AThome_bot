@@ -30,16 +30,13 @@ from aiogram.types.poll import Poll
 import src.func.info as get_weather_and_currency
 
 from src.keyboards import webapp_keyboard, set_main_keyboard, rent_keyboard, buy_keyboard, master_keyboard
-
+from typer import Typer
+from src.db.mongo import db_collection
+from src.tasks import get_all_dramatiq
 
 class InvoiceStates(StatesGroup):
     sendInvoice = State()
     moneybox = State()
-
-from typer import Typer
-
-# from src.db.mongo import db_collection
-# from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 

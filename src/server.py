@@ -63,13 +63,23 @@ def img(img):
     }
 
 def add_test_data():
-    cleaning.add_row({
-        "status" : "active",
-        "title" : "test",
-        "subtitle" : "100",
-        "photo" : "test.jpg",
-        "tel" : "+79999999999"
-    })
+    # cleaning.add_row({
+    #     "status" : "active",
+    #     "title" : "test",
+    #     "subtitle" : "100",
+    #     "photo" : "test.jpg",
+    #     "tel" : "+79999999999"
+    # })
+
+    cleaning.drop_collection()
+    cargo.drop_collection()
+    ren_apartment.drop_collection()
+    electricity.drop_collection()
+    painter.drop_collection()
+    security.drop_collection()
+    water.drop_collection()
+    plumbing.drop_collection()
+
 
 def run():
     app.run(host="0.0.0.0", port="5600") # запуск сервераp

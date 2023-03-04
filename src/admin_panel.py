@@ -20,6 +20,17 @@ plumbing = db_collection("plumbing")
 
 admins = db_collection("admins")
 
+spec_names = {
+    "1": "Клининг",
+    "2": "Перевозка грузов",
+    "3": "Ремонт квартир",
+    "4": "Электрика",
+    "5": "Маляры и штукатуры",
+    "6": "Охрана",
+    "7": "Доставка воды",
+    "8": "Сантехника"
+}
+
 class AdminStates(StatesGroup):
     waiting_master_name = State()
     waiting_master_type = State()
@@ -136,7 +147,7 @@ async def ap_waiting_master_link(msg: types.Message, state: FSMContext):
             })
 
 
-    await msg.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nСсылка: {master_link}\nТип работы: {master_spec}")
+    await msg.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nСсылка: {master_link}\nТип работы: {spec_names[master_spec]}")
     await state.finish()
 
 
@@ -259,7 +270,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "tel" : master_number,
             })
         
-    await message.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nНомер: {master_number}\nТип работы: {master_spec}")
+    await message.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nНомер: {master_number}\nТип работы: {spec_names[master_spec]}")
     await state.finish()
     # await AdminStates.waiting_master_spec.set()
     

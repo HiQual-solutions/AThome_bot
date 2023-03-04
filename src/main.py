@@ -38,8 +38,8 @@ class InvoiceStates(StatesGroup):
 
 from typer import Typer
 
-from src.db.mongo import db_collection
-from src.tasks import get_all_dramatiq
+# from src.db.mongo import db_collection
+# from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
 
@@ -51,6 +51,8 @@ logging.basicConfig(level=logging.INFO)
 
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
+
+
 
 async def set_default_commands(dp):
     await dp.bot.set_my_commands([

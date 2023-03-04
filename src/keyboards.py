@@ -9,7 +9,8 @@ web_app = WebAppInfo(url=os.getenv("WEBAPP_URL"))
 webapp_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Услуги', web_app=web_app)]
-    ]
+    ],
+    resize_keyboard=True
 )
 
 main_keyboard = InlineKeyboardMarkup(row_width=3)

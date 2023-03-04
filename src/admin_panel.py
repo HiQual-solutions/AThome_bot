@@ -22,8 +22,10 @@ admins = db_collection("admins")
 
 class AdminStates(StatesGroup):
     waiting_master_name = State()
-    waiting_master_number = State()
     waiting_master_type = State()
+    waiting_master_link = State()
+    waiting_master_number = State()
+    waiting_master_spec = State()
     waiting_master_price = State()
     waiting_master_photo = State()
     waiting_masterID = State()
@@ -40,13 +42,126 @@ async def ap_add_master(cb: types.CallbackQuery):
 
     await AdminStates.waiting_master_name.set()
     await cb.message.answer("Введите имя мастера")
+    
+async def ap_waiting_master_type(cb: types.CallbackQuery):
+        await cb.answer()
+
+        if cb.data == "num":
+            await AdminStates.waiting_master_number.set()
+            await cb.message.answer("Введите номер телефона мастера")
+            return
+
+        await AdminStates.waiting_master_link.set()
+        await cb.message.answer("Отправьте ссылку на профиль мастера")
+
+
+async def ap_waiting_master_link(msg: types.Message, state: FSMContext):
+    user_data = await state.get_data()
+    master_name = user_data["master_name"]
+    master_spec = user_data["master_spec"]
+    master_link = msg.text
+
+    match master_spec:
+        case 1:
+            cleaning.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 2:
+            cargo.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 3:
+            ren_apartment.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 4:
+            electricity.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 5:
+            painter.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 6:
+            security.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 7:
+            water.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+        case 8:
+            plumbing.add_row({
+                "status" : "active",
+                "title" : master_name,
+                "subtitle" : "",
+                "photo" : "",
+                "tel" : "",
+                "link" : master_link
+            })
+
+
+    await msg.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nСсылка: {master_link}\nТип работы: {master_spec}")
+    await state.finish()
+
 
 async def ap_waiting_master_name(message: types.Message, state: FSMContext):
     await state.update_data(master_name=message.text)
 
 
-    await AdminStates.waiting_master_number.set()
-    await message.answer("Введите номер телефона мастера")
+    # await AdminStates.waiting_master_number.set()
+    # await message.answer("Введите номер телефона мастера")
+    await AdminStates.waiting_master_spec.set()
+    
+    master_keyboard = InlineKeyboardMarkup(row_width=3)
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Клининг", callback_data="1"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Перевозка грузов", callback_data="2"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Ремонт квартир", callback_data="3"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Электрика", callback_data="4"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Маляры и штукатуры", callback_data="5"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Охрана", callback_data="6"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Доставка воды", callback_data="7"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Сантехника", callback_data="8"))
+    master_keyboard = master_keyboard.add(InlineKeyboardButton("Назад", callback_data="9"))
+
+    await message.answer("Выберите специальность мастера", reply_markup=master_keyboard)
+
+    
 
 async def ap_waiting_master_num(message: types.Message, state: FSMContext):
     await state.update_data(master_number=message.text)
@@ -70,34 +185,15 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
     # print(await message.photo[-1].get_url())
     await state.update_data(master_photo=(await message.photo[-1].get_url()))
 
-
-    await AdminStates.waiting_master_type.set()
-    
-    master_keyboard = InlineKeyboardMarkup(row_width=3)
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Клининг", callback_data="1"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Перевозка грузов", callback_data="2"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Ремонт квартир", callback_data="3"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Электрика", callback_data="4"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Маляры и штукатуры", callback_data="5"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Охрана", callback_data="6"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Доставка воды", callback_data="7"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Сантехника", callback_data="8"))
-    master_keyboard = master_keyboard.add(InlineKeyboardButton("Назад", callback_data="9"))
-
-    await message.answer("Выберите тип работы мастера", reply_markup=master_keyboard)
-
-async def ap_waiting_master_type(cb: types.CallbackQuery, state: FSMContext):
-    await cb.answer()
-
     user_data = await state.get_data()
 
     master_name = user_data["master_name"]
     master_number = user_data["master_number"]
     master_price = user_data["master_price"]
     master_photo = user_data["master_photo"]
-    master_type = int(cb.data)
+    master_spec = user_data["master_spec"]
 
-    match master_type:
+    match master_spec:
         case 1:
             cleaning.add_row({
                 "status" : "active",
@@ -163,8 +259,35 @@ async def ap_waiting_master_type(cb: types.CallbackQuery, state: FSMContext):
                 "tel" : master_number,
             })
         
-    await cb.message.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nНомер: {master_number}\nТип работы: {master_type}")
+    await message.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nНомер: {master_number}\nТип работы: {master_spec}")
     await state.finish()
+    # await AdminStates.waiting_master_spec.set()
+    
+    # master_keyboard = InlineKeyboardMarkup(row_width=3)
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Клининг", callback_data="1"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Перевозка грузов", callback_data="2"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Ремонт квартир", callback_data="3"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Электрика", callback_data="4"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Маляры и штукатуры", callback_data="5"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Охрана", callback_data="6"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Доставка воды", callback_data="7"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Сантехника", callback_data="8"))
+    # master_keyboard = master_keyboard.add(InlineKeyboardButton("Назад", callback_data="9"))
+
+    # await message.answer("Выберите тип работы мастера", reply_markup=master_keyboard)
+
+async def ap_waiting_master_spec(cb: types.CallbackQuery, state: FSMContext):
+    await cb.answer()
+    await state.update_data(master_spec=int(cb.data))
+    
+
+    inlineKeyboad = InlineKeyboardMarkup()
+    inlineKeyboad.add(InlineKeyboardButton("По номеру", callback_data="num"))
+    inlineKeyboad.add(InlineKeyboardButton("По ссылке", callback_data="link"))
+
+    await AdminStates.waiting_master_type.set()
+    await cb.message.answer("Выберите тип вызова мастера", reply_markup=inlineKeyboad)
+
 
 async def ap_remove_master(cb: types.CallbackQuery, state: FSMContext):
     # await cb.answer()
@@ -181,15 +304,16 @@ async def ap_remove_master(cb: types.CallbackQuery, state: FSMContext):
     pass
 
 async def ap_waiting_masterID(cb: types.CallbackQuery, state: FSMContext):
-    await cb.answer()
-    masterID = int(cb.data.split("_")[2])
+    # await cb.answer()
+    # masterID = int(cb.data.split("_")[2])
 
-    #TODO: Здесь реализовать удаление мастера из бд
+    # #TODO: Здесь реализовать удаление мастера из бд
     
-    await cb.message.delete()
-    await cb.message.answer(f"Вы успешно удалили мастера: {master.name}, тип {master.type}")
+    # await cb.message.delete()
+    # await cb.message.answer(f"Вы успешно удалили мастера: {master.name}, тип {master.type}")
 
-    await state.finish()
+    # await state.finish()
+    pass
 
 async def ap_add_admin(cb: types.CallbackQuery):
     await cb.answer()
@@ -253,7 +377,7 @@ def setup(dp: Dispatcher):
     dp.register_message_handler(ap_waiting_master_num, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_number)
     dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_price)
     dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
-    dp.register_callback_query_handler(ap_waiting_master_type, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_type)
+    dp.register_callback_query_handler(ap_waiting_master_spec, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_spec)
     dp.register_callback_query_handler(ap_add_admin, lambda c: c.data == "admin_panel_add_admin")
     dp.register_callback_query_handler(ap_remove_admin, lambda c: c.data == "admin_panel_remove_admin")
     dp.register_message_handler(ap_waiting_adminID_add, state=AdminStates.waiting_adminID_add)

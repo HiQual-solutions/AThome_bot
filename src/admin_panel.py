@@ -378,6 +378,17 @@ def setup(dp: Dispatcher):
     dp.register_message_handler(ap_waiting_master_price, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_price)
     dp.register_message_handler(ap_waiting_master_photo, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_photo, content_types=['document', 'text', 'photo'])
     dp.register_callback_query_handler(ap_waiting_master_spec, lambda c: c.from_user.id in admins_list, state=AdminStates.waiting_master_spec)
+    dp.register_callback_query_handler(
+        ap_waiting_master_type, 
+        lambda c: c.from_user.id in admins_list, 
+        lambda c: c.data in ["num", "link"], 
+        state=AdminStates.waiting_master_type
+    )
+    dp.register_message_handler(
+        ap_waiting_master_link, 
+        lambda c: c.from_user.id in admins_list, 
+        state=AdminStates.waiting_master_link
+    )
     dp.register_callback_query_handler(ap_add_admin, lambda c: c.data == "admin_panel_add_admin")
     dp.register_callback_query_handler(ap_remove_admin, lambda c: c.data == "admin_panel_remove_admin")
     dp.register_message_handler(ap_waiting_adminID_add, state=AdminStates.waiting_adminID_add)

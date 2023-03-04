@@ -48,6 +48,17 @@ class MongoDatabase():
         new_update = {"$set" : update}
         db[self.collection_name].update_one(query, new_update)
 
+    def create_link(self, data):
+        for name, link, photo in data:
+            db[self.collection_name].create_one({
+                "status" : "active",
+                "title" : name,
+                "subtitle" : "",
+                "photo" : photo,
+                "tel" : "",
+                "link" : link
+            })
+
 
 class db_collection(MongoDatabase):
     def __init__(self, name_of_collection):

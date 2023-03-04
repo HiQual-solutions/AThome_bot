@@ -212,6 +212,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 2:
             cargo.add_row({
@@ -220,6 +221,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 3:
             ren_apartment.add_row({
@@ -228,6 +230,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 4:
             electricity.add_row({
@@ -236,6 +239,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 5:
             painter.add_row({
@@ -244,6 +248,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 6:
             security.add_row({
@@ -252,6 +257,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 7:
             water.add_row({
@@ -260,6 +266,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         case 8:
             plumbing.add_row({
@@ -268,6 +275,7 @@ async def ap_waiting_master_photo(message: types.Message, state: FSMContext):
                 "subtitle" : master_price,
                 "photo" : master_photo,
                 "tel" : master_number,
+                "link" : None
             })
         
     await message.answer(f"Вы добавили нового мастера:\n\nИмя: {master_name}\nНомер: {master_number}\nТип работы: {spec_names[master_spec]}")

@@ -50,7 +50,7 @@ class MongoDatabase():
 
     def create_link(self, data):
         for name, link, photo in data:
-            db[self.collection_name].create_one({
+            db[self.collection_name].insert_one({
                 "status" : "active",
                 "title" : name,
                 "subtitle" : "",

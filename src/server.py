@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import logging
 from flask import Flask, url_for, request
 from flask_cors import CORS
 from src.db.mongo import db_collection
@@ -18,7 +19,7 @@ CORS(app, resources={
     r"/assets/*": {"origins": "*"}
     }) # настройка CORS POLICY
 app.config['CORS_HEADERS'] = 'Access-Control-Allow-Origin'
-
+logging.basicConfig(level=logging.INFO)
 #фотка имя телефон ставка 
 
 
@@ -122,7 +123,7 @@ def add_test_data():
         ["Панда", "http://himpanda.kz/adresa-i-kontakty/", ""]
     ])
 
-    painter.create_links([
+    painter.create_link([
         ["Умит Мустафаева", "https://naimi.kz/specialist/260602?work_id=178#/", "Умит Мустафаева"],
         ["Жибек Бажан", "https://naimi.kz/specialist/69360?work_id=178#/", "https://upload.naimi.kz/picture/thumbnail/1YDZpRFwzBr9TJL"],
         ["Мухтар Сулейменов", "https://naimi.kz/specialist/28131?work_id=178#/", "https://upload.naimi.kz/picture/thumbnail/qRJ23czaKIp9NHI0VAGfXSYA5oqE2sN0oThr81ehPh7XcTmVGmrpeXAF6jNtEthMINvTzNAKZFtWeAV11UtX51cM1xGztadx1Q4jNwNmv"],
@@ -151,7 +152,7 @@ def add_test_data():
         ["Barsha.kz", "https://barsha.kz/remont-kvartir-almaty", ""]
     ])
 
-    water.create_links([
+    water.create_link([
         ["Комета", "https://calipso-water.kz/kontakty/", ""],
         ["Samal Water", "https://samal.kz/product-category/voda/", ""],
         ["Oasis water", "https://oasiswater.kz/index.php", ""],
@@ -161,17 +162,6 @@ def add_test_data():
         ["KL Logistic", "https://kl-logistic.kz/?utm_source=google-ads&utm_medium=cpc&utm_campaign=10833704063&utm_content=112267036448-456560684579-&utm_term=%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B7%D0%BA%D0%B0%20%D0%B3%D1%80%D1%83%D0%B7%D0%BE%D0%B2-e", ""],
         ["FARTLOGISTIC", "https://fartlogistic.kz/?gclid=Cj0KCQiAk4aOBhCTARIsAFWFP9Hojj1ASSGoVrzxSLDrVGJDlFEAKKqtbfQMQ4bwAwxJgL9DChupP4EaAkpeEALw_wcB", ""]
     ])
-
-
-
-
-    # cargo.drop_collection()
-    # ren_apartment.drop_collection()
-    # electricity.drop_collection()
-    # painter.drop_collection()
-    # security.drop_collection()
-    # water.drop_collection()
-    # plumbing.drop_collection()
 
 
 def run():

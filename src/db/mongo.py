@@ -35,8 +35,18 @@ class MongoDatabase():
     def get_all_rows(self, row):
         return [x for x in db[self.collection_name].find(row)]
 
+    def get_all_admins(self, row):
+        out = []
+        for x in db[self.collection_name].find(row):
+            out.append(x["adminID"])
+        return out
+    
     def drop_collection(self):
         db[self.collection_name].drop()
+
+    def change_data(self, query: dict, update: dict):
+        new_update = {"$set" : update}
+        db[self.collection_name].update_one(query, new_update)
 
 
 class db_collection(MongoDatabase):

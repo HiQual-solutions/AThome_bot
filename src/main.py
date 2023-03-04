@@ -42,8 +42,7 @@ from typer import Typer
 # from src.tasks import get_all_dramatiq
 
 # TODO: сделать возможность отправки кнопки закончить после каждого фото
-# TODO: реализовать отложенные задачи
-# TODO: добавить все чаты в .env
+
 
 User = db_collection("User")
 Data_menu = db_collection("Data_menu")
@@ -71,13 +70,16 @@ async def welcome(message: types.Message, state: FSMContext):
     if bool(cur_state):
         await state.finish()
 
-    # data = Data_menu.find_by_sort([("period", -1)])
-    # await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
-    # await message.answer(
-    # f"\nПоследнее обновление: {data['date']}" + 
-    # f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
-    # f"\nДавление: {data['pressure']} рт. ст." +
-    # f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins))
+    data = Data_menu.find_by_sort([("period", -1)])
+    
+    admins_list = admins.get_all_admins({"status" : "active"})
+
+    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    await message.answer(
+    f"\nПоследнее обновление: {data['date']}" + 
+    f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
+    f"\nДавление: {data['pressure']} рт. ст." +
+    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins_list))
 
 
 
@@ -156,7 +158,8 @@ async def set_buy(cb: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'goback')
 async def rent_goback(cb: types.CallbackQuery):
-    await cb.message.edit_text(cb.message.text, reply_markup=main_keyboard)
+    admins_list = admins.get_all_admins({"status" : "active"})
+    await cb.message.edit_text(cb.message.text, reply_markup=set_main_keyboard(cb.from_user.id, admins_list))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'order_master')
@@ -212,6 +215,10 @@ def run() -> None:
     loop.run_until_complete(future) # loop until done
    
     logging.info("[RUN SERVICE]")
+    admins.add_row({
+        "adminID": 588558797,
+        "status": "active",
+    })
     
     get_all_dramatiq()
     executor.start_polling(dp, skip_updates=False)

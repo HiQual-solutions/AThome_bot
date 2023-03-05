@@ -15,7 +15,7 @@ def get_weather() -> Optional[list]:
     try:
         weather_temp_c = out.json()["current"]["temp_c"]
         weather_data = out.json()["current"]["last_updated"].split(" ")
-        weather_data = weather_data[0].split("-")[2] + "." + weather_data[0].split("-")[1] + " " + weather_data[1]
+        weather_data = weather_data[0].split("-")[2] + "." + weather_data[0].split("-")[1]
         humidity =  out.json()["current"]["humidity"]
         pressure = float(out.json()['current']["pressure_mb"]) * 0.750063755419211
         return [weather_data, weather_temp_c, humidity, int(pressure)] 

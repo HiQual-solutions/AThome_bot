@@ -3,7 +3,7 @@ import logging
 from flask import Flask, url_for, request
 from flask_cors import CORS
 from src.db.mongo import db_collection
-from admin_panel import admins
+from src.admin_panel import admins
 
 cleaning = db_collection("cleaning")
 cargo = db_collection("cargo")

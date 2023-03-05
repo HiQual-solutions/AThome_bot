@@ -71,12 +71,12 @@ async def welcome(message: types.Message, state: FSMContext):
     
     admins_list = admins.get_all_admins({"status" : "active"})
 
-    await message.answer(f"Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
+    await message.answer(f"💫 Добрый день, {message.from_user.full_name}!", reply_markup=webapp_keyboard)
     await message.answer(
     f"\nПоследнее обновление: {data['date']}" + 
-    f"\nТемпература: {data['temp']}°С | Влажность: {data['humidity']}%" +
-    f"\nДавление: {data['pressure']} рт. ст." +
-    f"\nКурс: ${data['currency'][0]}, €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins_list))
+    f"\nТемпература: {data['temp']}°С | 💦 Влажность: {data['humidity']}%" +
+    f"\n☁️ Давление: {data['pressure']} рт. ст." +
+    f"\nКурс: 💵 ${data['currency'][0]}, 💶 €{data['currency'][1]}", reply_markup=set_main_keyboard(message.from_user.id, admins_list))
 
 
 
